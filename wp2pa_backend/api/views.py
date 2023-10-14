@@ -1,4 +1,5 @@
 import datetime
+import json
 import pickle
 
 from rest_framework import viewsets
@@ -6,11 +7,13 @@ from rest_framework import viewsets
 from parser.models import MarketData
 from parser.models import MarketAction
 from parser.serializers import MarketActionSerializer
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from wallet.types import Offer
+
+from parser.utils import obj_to_dict
 
 
-
-# Create your views here.
 class MarketActionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = MarketAction.objects.all()
     serializer_class = MarketActionSerializer
@@ -23,18 +26,17 @@ class MarketActionViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
+
+@api_view(['GET'])
 def export_market_offers(request):
-
     row = MarketData.objects.first()
-    print(row.bid_offers)
-    bid_offers = pickle.loads(row.bid_offers, fix_imports=True)
-    # ask_offers = pickle.loads(row.ask_offers, encoding='utf-8')
 
-    print(bid_offers)
-
-
+    bid_offers: [Offer] = pickle.loads(row.bid_offers)
+    ask_offers: [Offer] = pickle.loads(row.ask_offers)
 
     content = {
-        'status': 1
+        'asks': [obj_to_dict(a) for a in ask_offers],
+        'bids': [obj_to_dict(b) for b in bid_offers]
     }
+
     return Response(content)

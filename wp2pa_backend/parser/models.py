@@ -21,8 +21,8 @@ from django.utils.timezone import now
 
 class MarketData(models.Model):
     id = models.AutoField(primary_key=True)
-    bid_offers = models.TextField()
-    ask_offers = models.TextField()
+    bid_offers = models.BinaryField()
+    ask_offers = models.BinaryField()
 
 
 class MarketAction(models.Model):
