@@ -1,7 +1,10 @@
 import datetime
 import json
 import pickle
+import time
 
+from django.db.models import QuerySet
+from django.http import JsonResponse
 from rest_framework import viewsets
 
 from parser.models import MarketData
@@ -24,7 +27,44 @@ class MarketActionViewSet(viewsets.ReadOnlyModelViewSet):
             timestamp = int(self.request.query_params.get('after'))
             queryset = queryset.filter(timestamp__gte=timestamp)
 
-        return queryset
+        return queryset[:100]
+
+
+@api_view(['GET'])
+def export_activity_stats(request):
+    stamp = request.GET.get("after")
+    out = {'data': []}
+
+    if stamp:
+        data: [MarketAction] = list(MarketAction.objects.all().filter(timestamp__gte=stamp))
+        rows = [each.timestamp for each in data]
+
+        prev_time = 0
+        counter = 0
+        period = 60 * 5
+        result = []
+        next_time = 0
+
+        for s in rows:
+            div = s % period
+            next_time = s - div
+
+            if prev_time != next_time:
+                if prev_time != 0:
+                    result.append({'time': next_time, 'value': counter})
+
+                prev_time = next_time
+                counter = 1
+
+            else:
+                counter += 1
+
+        if next_time == prev_time and next_time != 0:
+            result.append({'time': next_time + period, 'value': counter})
+
+        out = {'data': result}
+
+    return JsonResponse(out)
 
 
 @api_view(['GET'])

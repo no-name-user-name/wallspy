@@ -65,6 +65,7 @@ def actions_handler(bid_offers, ask_offers, market_price):
                         old_price=prev_price,
                         new_price=cur_price,
                         offer_type=cur_offer.type,
+                        timestamp=int(time.time())
                     ).save()
 
                     print(f"Price up: {prev_price} => {cur_price}")
@@ -79,6 +80,7 @@ def actions_handler(bid_offers, ask_offers, market_price):
                         old_price=prev_price,
                         new_price=cur_price,
                         offer_type=cur_offer.type,
+                        timestamp=int(time.time())
                     ).save()
                     print(f"Price down: {prev_price} => {cur_price}")
 
@@ -103,6 +105,8 @@ def actions_handler(bid_offers, ask_offers, market_price):
                     # old_price=prev_price,
                     # new_price=cur_price,
                     offer_type=prev_offer.type,
+                    timestamp=int(time.time())
+
                 ).save()
 
                 print('Offer delete')
@@ -115,7 +119,6 @@ def actions_handler(bid_offers, ask_offers, market_price):
                     flag = True
                     break
             if not flag:
-
                 MarketAction(
                     order_id=cur_offer.id,
                     action_type=ActionTypes.offer_add,
@@ -125,6 +128,7 @@ def actions_handler(bid_offers, ask_offers, market_price):
                     # old_price=prev_price,
                     # new_price=cur_price,
                     offer_type=cur_offer.type,
+                    timestamp=int(time.time())
                 ).save()
 
                 print('Offer added')
@@ -150,6 +154,7 @@ def actions_handler(bid_offers, ask_offers, market_price):
                                 old_volume=prev_vol,
                                 new_volume=cur_vol,
                                 offer_type=offer_type,
+                                timestamp=int(time.time())
                             ).save()
                             print(f'Increase volume {prev_vol} => {cur_vol}')
 
@@ -164,6 +169,7 @@ def actions_handler(bid_offers, ask_offers, market_price):
                                 old_volume=prev_vol,
                                 new_volume=cur_vol,
                                 offer_type=offer_type,
+                                timestamp=int(time.time())
                             ).save()
                             print(
                                 f'Decrease volume {prev_vol} => {cur_vol}, or buy {round(prev_vol - cur_vol, 2)} TON')
@@ -180,6 +186,7 @@ def actions_handler(bid_offers, ask_offers, market_price):
                                 old_volume=prev_vol,
                                 new_volume=cur_vol,
                                 offer_type=offer_type,
+                                timestamp=int(time.time())
                             ).save()
                             print(f'Increase volume {prev_vol} => {cur_vol}')
 
@@ -194,10 +201,10 @@ def actions_handler(bid_offers, ask_offers, market_price):
                                 old_volume=prev_vol,
                                 new_volume=cur_vol,
                                 offer_type=offer_type,
+                                timestamp=int(time.time())
                             ).save()
                             print(
                                 f'Decrease volume {prev_vol} => {cur_vol}, or sell {round(prev_vol - cur_vol, 2)} TON')
-
 
     memory['prev_offers'] = offers
     memory['prev_offer_price_percent'] = memory['offer_price_percent']

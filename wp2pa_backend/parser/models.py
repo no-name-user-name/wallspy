@@ -37,4 +37,4 @@ class MarketAction(models.Model):
     offer_type = models.TextField(null=True)
     old_volume = models.FloatField(null=True)
     new_volume = models.FloatField(null=True)
-    timestamp = models.IntegerField(default=int(time.time()))
+    timestamp = models.IntegerField()

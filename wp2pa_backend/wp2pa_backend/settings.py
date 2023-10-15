@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'wsocket',
     'parser',
     'rest_framework',
     'corsheaders',
