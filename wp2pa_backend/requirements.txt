@@ -3,3 +3,5 @@ pyTelegramWalletApi==0.2.11
 django-filter
 django-cors-headers
 djangorestframework
+channels
+daphne

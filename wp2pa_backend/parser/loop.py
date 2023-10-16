@@ -1,3 +1,4 @@
+import json
 import os
 import pickle
 import threading
@@ -12,6 +13,28 @@ from wallet.web_client import Client
 from .models import MarketData
 
 from .models import MarketAction
+
+
+# def send_market_action(ma, t):
+#     for user in myconf.subscribers:
+#         try:
+#             data = {
+#                 'id': ma.id,
+#                 'order_id': ma.order_id,
+#                 'action_type': ma.action_type,
+#                 'full_action_type': t,
+#                 'user_id': ma.user_id,
+#                 'user_name': ma.user_name,
+#                 'user_avatar_code': ma.user_avatar_code,
+#                 'old_price': ma.old_price,
+#                 'new_price': ma.new_price,
+#                 'offer_type': ma.offer_type,
+#                 'timestamp': ma.timestamp,
+#             }
+#             result = {'type': 'new_action', 'data': data}
+#             user.send(json.dumps(result))
+#         except Exception as e:
+#             print(f"[!] Error send market action: {e}")
 
 
 def token_update(delay=60 * 10):
@@ -56,7 +79,7 @@ def actions_handler(bid_offers, ask_offers, market_price):
                 prev_price = memory['prev_offer_price_percent'][cur_offer.id]
 
                 if cur_price > prev_price:
-                    MarketAction(
+                    ma = MarketAction(
                         order_id=cur_offer.id,
                         action_type=ActionTypes.price_change,
                         user_id=cur_offer.user.userId,
@@ -66,12 +89,14 @@ def actions_handler(bid_offers, ask_offers, market_price):
                         new_price=cur_price,
                         offer_type=cur_offer.type,
                         timestamp=int(time.time())
-                    ).save()
+                    )
+                    ma.save()
+                    # send_market_action(ma, 'price_increase')
 
                     print(f"Price up: {prev_price} => {cur_price}")
 
                 elif cur_price < prev_price:
-                    MarketAction(
+                    ma = MarketAction(
                         order_id=cur_offer.id,
                         action_type=ActionTypes.price_change,
                         user_id=cur_offer.user.userId,
@@ -81,7 +106,9 @@ def actions_handler(bid_offers, ask_offers, market_price):
                         new_price=cur_price,
                         offer_type=cur_offer.type,
                         timestamp=int(time.time())
-                    ).save()
+                    )
+                    ma.save()
+                    # send_market_action(ma, 'price_decrease')
                     print(f"Price down: {prev_price} => {cur_price}")
 
     if 'prev_offers' in memory:
@@ -96,7 +123,7 @@ def actions_handler(bid_offers, ask_offers, market_price):
                     break
 
             if not flag:
-                MarketAction(
+                ma = MarketAction(
                     order_id=prev_offer.id,
                     action_type=ActionTypes.offer_delete,
                     user_id=prev_offer.user.userId,
@@ -107,7 +134,9 @@ def actions_handler(bid_offers, ask_offers, market_price):
                     offer_type=prev_offer.type,
                     timestamp=int(time.time())
 
-                ).save()
+                )
+                ma.save()
+                # send_market_action(ma, ActionTypes.offer_delete)
 
                 print('Offer delete')
 
@@ -119,7 +148,7 @@ def actions_handler(bid_offers, ask_offers, market_price):
                     flag = True
                     break
             if not flag:
-                MarketAction(
+                ma = MarketAction(
                     order_id=cur_offer.id,
                     action_type=ActionTypes.offer_add,
                     user_id=cur_offer.user.userId,
@@ -129,7 +158,9 @@ def actions_handler(bid_offers, ask_offers, market_price):
                     # new_price=cur_price,
                     offer_type=cur_offer.type,
                     timestamp=int(time.time())
-                ).save()
+                )
+                ma.save()
+                # send_market_action(ma, ActionTypes.offer_add)
 
                 print('Offer added')
 
@@ -145,7 +176,7 @@ def actions_handler(bid_offers, ask_offers, market_price):
 
                         if cur_vol > prev_vol:
 
-                            MarketAction(
+                            ma = MarketAction(
                                 order_id=cur_offer.id,
                                 action_type=ActionTypes.volume_change,
                                 user_id=cur_offer.user.userId,
@@ -155,12 +186,15 @@ def actions_handler(bid_offers, ask_offers, market_price):
                                 new_volume=cur_vol,
                                 offer_type=offer_type,
                                 timestamp=int(time.time())
-                            ).save()
+                            )
+                            ma.save()
+                            # send_market_action(ma, 'increase_volume')
+
                             print(f'Increase volume {prev_vol} => {cur_vol}')
 
                         elif cur_vol < prev_vol:
 
-                            MarketAction(
+                            ma = MarketAction(
                                 order_id=cur_offer.id,
                                 action_type=ActionTypes.volume_change,
                                 user_id=cur_offer.user.userId,
@@ -170,14 +204,17 @@ def actions_handler(bid_offers, ask_offers, market_price):
                                 new_volume=cur_vol,
                                 offer_type=offer_type,
                                 timestamp=int(time.time())
-                            ).save()
+                            )
+                            ma.save()
+                            # send_market_action(ma, 'decrease_volume_or_buy')
+
                             print(
                                 f'Decrease volume {prev_vol} => {cur_vol}, or buy {round(prev_vol - cur_vol, 2)} TON')
 
                     else:
                         if cur_vol > prev_vol:
 
-                            MarketAction(
+                            ma = MarketAction(
                                 order_id=cur_offer.id,
                                 action_type=ActionTypes.volume_change,
                                 user_id=cur_offer.user.userId,
@@ -187,12 +224,15 @@ def actions_handler(bid_offers, ask_offers, market_price):
                                 new_volume=cur_vol,
                                 offer_type=offer_type,
                                 timestamp=int(time.time())
-                            ).save()
+                            )
+                            ma.save()
+                            # send_market_action(ma, 'increase_volume')
+
                             print(f'Increase volume {prev_vol} => {cur_vol}')
 
                         elif cur_vol < prev_vol:
 
-                            MarketAction(
+                            ma = MarketAction(
                                 order_id=cur_offer.id,
                                 action_type=ActionTypes.volume_change,
                                 user_id=cur_offer.user.userId,
@@ -202,7 +242,11 @@ def actions_handler(bid_offers, ask_offers, market_price):
                                 new_volume=cur_vol,
                                 offer_type=offer_type,
                                 timestamp=int(time.time())
-                            ).save()
+                            )
+
+                            ma.save()
+                            # send_market_action(ma, 'decrease_volume_or_sell')
+
                             print(
                                 f'Decrease volume {prev_vol} => {cur_vol}, or sell {round(prev_vol - cur_vol, 2)} TON')
 

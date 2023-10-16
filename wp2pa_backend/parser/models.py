@@ -38,3 +38,4 @@ class MarketAction(models.Model):
     old_volume = models.FloatField(null=True)
     new_volume = models.FloatField(null=True)
     timestamp = models.IntegerField()
+

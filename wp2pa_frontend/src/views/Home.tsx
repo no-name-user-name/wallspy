@@ -1,6 +1,7 @@
 import RatesPanel from "../components/home/RatesPanel";
 import ControlPanel from "../components/home/ControlPanel";
 import Graph from "../components/home/Graph";
+import OrderBook from "../components/home/OrderBook";
 
 export default function Home(){
 
@@ -59,7 +60,7 @@ export default function Home(){
                         <Graph/>
                     </div>
                     <div className="order-book">
-
+                        <OrderBook/>
                     </div>
                 </div>
 

@@ -1,8 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {UTCTimestamp, ISeriesApi, LineWidth, CrosshairMode, ColorType} from 'lightweight-charts';
-import {Chart, CandlestickSeries, LineSeries} from 'lightweight-charts-react-wrapper';
+import {Chart, CandlestickSeries, LineSeries, HistogramSeries} from 'lightweight-charts-react-wrapper';
 import { fetchJSON } from '../../utils/Utils';
-import { ENDPOIN } from '../../settings';
+import { ENDPOIN, WS_ENDPOINT } from '../../settings';
 
 interface CandleHistory{
 	time: UTCTimestamp,
@@ -20,8 +20,9 @@ interface ActivityHistory{
 export default function Graph(){
 	const [candleHistory, setCandleHistory] = useState<CandleHistory[]>([]);
 	const candleSeries = useRef<ISeriesApi<'Candlestick'>>(null);
-
     const [activityHistory, setActivityHistory] = useState<ActivityHistory[]>([]);
+	const lineSeries = useRef<ISeriesApi<'Line'>>(null);
+	const histogramSeries = useRef<ISeriesApi<'Histogram'>>(null);
 
 
     function wsUpdateCandle(){
@@ -58,7 +59,7 @@ export default function Graph(){
                 try {
                     candleSeries.current?.update({time: time, open: open, high: high, low: low, close: close});
                 } catch (error) {
-                    // console.log(error)
+
                 }
             }
         };
@@ -92,18 +93,60 @@ export default function Graph(){
 
     function getWalletActionsHistory(after: number){
         fetchJSON(ENDPOIN + '/api/v1/market/actions/?after=' + after)
-            .then(data => {
-                setActivityHistory(data.data)
-            })  
+        .then(data => {
+            setActivityHistory(data.data)
+        })  
     }
 
+    function wsUpdateWalletAction(){
+        const socket = new WebSocket(WS_ENDPOINT + '/ws/');
+		
+        socket.onopen = function() {
+			let msg = {
+				"method": "activity_subscribe"
+			}
+			this.send(JSON.stringify(msg))
+		};
+
+        socket.onmessage = function(event) {
+			let json_data = JSON.parse(event.data)			
+			if (json_data.hasOwnProperty('type')){
+				if (json_data.type === 'activity_subscribe'){
+                    for (let el of json_data.data){
+                        // console.log(el)
+                        try {
+                            // lineSeries.current?.update({time: el.time, value: el.value})
+                            histogramSeries.current?.update({time: el.time, value: el.value})
+                        } catch (error) {
+                            console.log(error)
+                        }
+                    }
+				}
+			}
+		};
+
+        socket.onclose = function(event) {
+            wsUpdateWalletAction()
+        }
+    }
 
     useEffect(() => {
         getCandleHistory()
         wsUpdateCandle()
+        wsUpdateWalletAction()
     }, [])
 
     const options = {
+        // handleScroll:{
+        //     mouseWheel:false,
+        //     pressedMouseMove: false,
+        //     horzTouchDrag:false,
+        //     vertTouchDrag:false
+        // },
+        // handleScale:{
+        //     mouseWheel: false,
+        //     pinch:false
+        // },
 		width: 600,
 		height: 300,
 		rightPriceScale: {
@@ -133,29 +176,32 @@ export default function Graph(){
 			borderColor: 'rgba(197, 203, 206, 1)',
 			timeVisible: true
 		},
-		handleScroll: {
-			vertTouchDrag: false,
-		},
+		// handleScroll: {
+		// 	vertTouchDrag: false,
+		// },
 	}
 
     return (
-        <Chart {...options}>
-            <CandlestickSeries
-                data={candleHistory}
-                reactive={true}
-                ref={candleSeries}
-                priceScaleId="right"
-            />
+        <>
+            <Chart {...options}>
+                <CandlestickSeries
+                    data={candleHistory}
+                    reactive={true}
+                    ref={candleSeries}
+                    // title='TON/USDT'
+                    priceScaleId="right" />
+            </Chart>
 
-            <LineSeries 
-                data={activityHistory} 
-                reactive={true}
-                // ref={lineSeries}
-                priceScaleId="left"
-                color="rgba(4, 111, 232, 0.6)"
-                lineWidth={2}
-            />
-        </Chart>
+            <Chart {...options}>
+                <HistogramSeries
+                    // title='User activity'
+                    data={activityHistory}
+                    priceScaleId="right"
+                    reactive={true}
+                    ref={histogramSeries}
+                    color="#26a69a"
+                    priceFormat={{ type: "volume" }} />
+            </Chart></>
     )
 
 }
