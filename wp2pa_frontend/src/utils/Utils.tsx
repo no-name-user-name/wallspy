@@ -25,6 +25,22 @@ async function fetchJSON(url: string, method='GET', json_data=null) {
 
 }
 
-export {fetchJSON}
+function timeToLocal(originalTime: number) {
+    const d = new Date(originalTime * 1000);
+    return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()) / 1000;
+}
+
+function openLink(id: number, user_id: number){
+    let url = `https://t.me/wallet?startattach=offerid_${id}_${user_id}`
+    window.open(url, '_blank');
+}
+
+function dayPercent(open: number, current: number){
+    let result = ((open-current)/current*100 * -1)
+    return result >= 0? '+' + result.toFixed(2) + '%' : '' + result.toFixed(2) + '%'
+}
+
+export {fetchJSON, timeToLocal, openLink, dayPercent}
+
 
 

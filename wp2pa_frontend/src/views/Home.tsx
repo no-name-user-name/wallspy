@@ -1,15 +1,14 @@
-import RatesPanel from "../components/home/RatesPanel";
-import ControlPanel from "../components/home/ControlPanel";
-import Graph from "../components/home/Graph";
-import OrderBook from "../components/home/OrderBook";
+import RatesPanel from "../components/main/RatesPanel";
+import Graph from "../components/main/Graph";
+import OrderBook from "../components/main/OrderBook";
+import Header from "../components/Header";
 
 export default function Home(){
 
     return(
         <div className="container">
 
-            <ControlPanel/>
-            <RatesPanel/>
+            <Header/>
 
             <div className="graph-panel">
                 
@@ -41,7 +40,7 @@ export default function Home(){
                     </div>
                 </div>
 
-                <div className="graph-settings">
+                {/* <div className="graph-settings">
                     <select className="graph-type">
                         <option>Chart</option>
                         <option>Chart1</option>
@@ -53,7 +52,7 @@ export default function Home(){
                         <option>1 Day</option>
                         <option>1 Day</option>
                     </select>
-                </div>
+                </div> */}
                 
                 <div className="main-graph">
                     <div className="graph">

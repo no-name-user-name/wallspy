@@ -301,4 +301,4 @@ def activate(delay=10):
 
 
 if __name__ == '__main__':
-    activate()
+    activate(5)

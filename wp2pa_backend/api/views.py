@@ -29,9 +29,9 @@ class MarketActionViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset[:100]
 
-
+# activity data for graphs {time:timestamp, value: num} format
 @api_view(['GET'])
-def export_activity_stats(request):
+def export_activity(request):
     stamp = request.GET.get("after")
     out = {'data': []}
 
@@ -63,6 +63,39 @@ def export_activity_stats(request):
             result.append({'time': next_time + period, 'value': counter})
 
         out = {'data': result}
+
+    return JsonResponse(out)
+
+
+@api_view(['GET'])
+def export_activity_stats(request):
+    data: [MarketAction] = list(MarketAction.objects.all().filter(timestamp__gte=stamp))
+    rows = [each.timestamp for each in data]
+
+    prev_time = 0
+    counter = 0
+    period = 60 * 5
+    result = []
+    next_time = 0
+
+    for s in rows:
+        div = s % period
+        next_time = s - div
+
+        if prev_time != next_time:
+            if prev_time != 0:
+                result.append({'time': next_time, 'value': counter})
+
+            prev_time = next_time
+            counter = 1
+
+        else:
+            counter += 1
+
+    if next_time == prev_time and next_time != 0:
+        result.append({'time': next_time + period, 'value': counter})
+
+    out = {'data': result}
 
     return JsonResponse(out)
 

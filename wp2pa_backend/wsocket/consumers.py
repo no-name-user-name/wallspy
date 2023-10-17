@@ -1,17 +1,73 @@
 import json
 import pickle
+import pprint
 import threading
 import time
 
 from channels.generic.websocket import WebsocketConsumer
-from parser.models import MarketAction
+from parser.models import MarketAction, MarketData
+from wallet.types import Offer
 
-subscribers = []
-connections = {}
-thread = None
+from parser.utils import obj_to_dict
+from .ws_types import Connection
+
+action_subscribers = []
+market_subscribers = []
+connections: list[Connection] = []
+thread_actions = None
+thread_market = None
+thread_alive_checker = None
 
 
-def update_loop(delay=1):
+# delete all 'sleeping' connections
+def alive_checker():
+    global connections
+    while 1:
+        try:
+            for conn in connections:
+                for port in conn.ports:
+                    if int(time.time()) - conn.get_last_call(port) > 30:
+                        conn.ws[port].close()
+
+        except Exception as e:
+            print(f"[!] Update Market Error: {e}")
+
+        finally:
+            time.sleep(1)
+
+
+# market subscription
+def update_market(delay=2.5):
+    prev_content = None
+    while 1:
+        try:
+            row = MarketData.objects.first()
+            content = {
+                'type': 'market_subscribe',
+                'data': {
+                    'asks': [obj_to_dict(a) for a in pickle.loads(row.bid_offers)],
+                    'bids': [obj_to_dict(b) for b in pickle.loads(row.ask_offers)]
+                }
+            }
+
+            if content == prev_content:
+                continue
+
+            prev_content = content
+
+            for conn in connections:
+                for user in conn.get_market_subs():
+                    user.send(json.dumps(content))
+
+        except Exception as e:
+            print(f"[!] Update Market Error: {e}")
+
+        finally:
+            time.sleep(delay)
+
+
+# action subscription
+def update_actions(delay=1):
     last_id = 0
     while 1:
         try:
@@ -72,11 +128,12 @@ def update_loop(delay=1):
 
                 stamps = {'type': 'activity_subscribe', 'data': result[-2:], 'actions': actions}
 
-                for user in subscribers:
-                    user.send(json.dumps(stamps))
+                for conn in connections:
+                    for user in conn.get_market_subs():
+                        user.send(json.dumps(stamps))
 
         except Exception as e:
-            print(f"[*] Error loop update: {e}")
+            print(f"[*] Error actions update: {e}")
             raise
 
         finally:
@@ -88,36 +145,81 @@ class PresenceConsumer(WebsocketConsumer):
         super().__init__(*args, **kwargs)
 
     def connect(self):
-        ip = self.scope['client'][0]
+        global thread_alive_checker, connections
+        if thread_alive_checker is None:
+            thread_alive_checker = threading.Thread(target=alive_checker)
+            thread_alive_checker.start()
 
-        if connections.get(ip):
-            if len(connections[ip]['ports']) < 4:
-                connections[ip]['ports'].append(self)
-                self.accept()
-            else:
-                self.close()
-        else:
-            connections[ip] = {'ports': [self]}
+        ip = self.scope['client'][0]
+        port = self.scope['client'][1]
+
+        if ip not in connections:
+            connections.append(Connection(ip=ip, port=port, ws_obj=self))
             self.accept()
+            pprint.pprint(connections)
+
+        else:
+            current_connect: Connection = connections[connections.index(ip)]
+
+            # max 4 connection on 1 ip address
+            if len(current_connect.ports) > 4:
+                self.close()
+
+            else:
+                current_connect.add_port(port, ws_obj=self)
+                self.accept()
+                pprint.pprint(connections)
 
     def receive(self, text_data=None, bytes_data=None):
-        global thread
+        global thread_actions, thread_market
 
         json_data = json.loads(text_data)
         method = json_data['method']
 
+        ip = self.scope['client'][0]
+        port = self.scope['client'][1]
+
         if method == 'activity_subscribe':
+            if thread_actions is None:
+                thread_actions = threading.Thread(target=update_actions)
+                thread_actions.start()
 
-            if thread is None:
-                thread = threading.Thread(target=update_loop)
-                thread.start()
+            connections[connections.index(ip)].action_subscribe(port)
 
-            subscribers.append(self)
+        elif method == 'ping':
+            content = {
+                'type': 'ping',
+                'data': 'pong'
+            }
+            self.send(json.dumps(content))
+            connections[connections.index(ip)].update_last_call(port)
+
+        elif method == 'market_subscribe':
+            if thread_market is None:
+                thread_market = threading.Thread(target=update_market)
+                thread_market.start()
+
+            if self not in market_subscribers:
+                # fast send current market
+                row = MarketData.objects.first()
+                content = {
+                    'type': 'market_subscribe',
+                    'data': {
+                        'asks': [obj_to_dict(a) for a in pickle.loads(row.bid_offers)],
+                        'bids': [obj_to_dict(b) for b in pickle.loads(row.ask_offers)]
+                    }
+                }
+                self.send(json.dumps(content))
+
+                connections[connections.index(ip)].market_subscribe(port)
 
     def disconnect(self, code):
-        if self in subscribers:
-            subscribers.remove(self)
-
         ip = self.scope['client'][0]
-        if connections.get(ip):
-            connections.pop(ip)
+        port = self.scope['client'][1]
+        conn: Connection = connections[connections.index(ip)]
+        conn.remove_port(port)
+
+        if not conn.ports:
+            connections.remove(conn)
+
+        pprint.pprint(connections)
