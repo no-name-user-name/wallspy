@@ -51,6 +51,9 @@ def wallet_tx_update():
             if new_txs:
                 new_txs.reverse()
 
+            if not new_txs:
+                continue
+
             i = 0
             for tx in new_txs:
                 account = tx['account']
