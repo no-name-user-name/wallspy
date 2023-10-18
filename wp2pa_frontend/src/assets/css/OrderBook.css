@@ -1569,7 +1569,7 @@
     flex-wrap: nowrap;
     flex-direction: column;
     justify-content: center;
-    /* padding: 0 10px; */
+    margin-bottom: 35px;
   }
   
   .book_panel{
@@ -1699,17 +1699,23 @@
     .header{
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      align-content: center;
+      align-items: flex-start;
+      align-content: flex-start;
       width: 100%;
+      margin-bottom: 10px;
+    }
+    .header p{
+      margin: 0;
+      color: white;
     }
     
     .numrows {
-      background: #211f28;
-      width: 125px;
+      background: #04020d;
+      width: 100px;
       text-align: center;
       text-align-last: center;
-      height: 35px;
+      height: 30px;
+      border: 1px solid rgba(100,150,200,.5);
     }
     .panel_decorate{
       margin: 4px;

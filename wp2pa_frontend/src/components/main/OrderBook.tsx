@@ -3,12 +3,12 @@ import { useEffect, useState } from "react"
 import '../../assets/css/OrderBook.css';
 import { WS_ENDPOINT } from "../../settings";
 import {BookRows, BookHead} from "../orderBook/BookRow";
-import { MarketOffer, MarketPack } from "../../types/offers";
+import { MarketOfferRef, MarketPack } from "../../types/offers";
 
 
 export default function OrderBook() {
-    const [marketBids, setMarketBids] = useState<MarketOffer[]>([]);
-    const [marketAsks, setMarketAsks] = useState<MarketOffer[]>([]);
+    const [marketBids, setMarketBids] = useState<MarketOfferRef[]>([]);
+    const [marketAsks, setMarketAsks] = useState<MarketOfferRef[]>([]);
     const [rowsCount, setRowsCount] = useState(10)
     const [topVolume, setTopVolume] = useState(0);
 
@@ -37,7 +37,7 @@ export default function OrderBook() {
 
 			if (json_data.hasOwnProperty('type')){
 				if (json_data.type === 'market_subscribe'){
-                    const data = json_data.data as MarketPack
+                    const data = json_data.data
                     
                     let asks = data.asks.slice(0, rowsCount)
                     let bids = data.bids.slice(0, rowsCount)
@@ -46,12 +46,12 @@ export default function OrderBook() {
                     setMarketAsks(asks)
 
                     let top = topVolume
-                    for(const o of asks as MarketOffer[]){
+                    for(const o of asks as MarketOfferRef[]){
                         if (o.available_volume > top){
                             top = o.available_volume
                         }
                     }
-                    for(const o of bids as MarketOffer[]){
+                    for(const o of bids as MarketOfferRef[]){
                         if (o.available_volume > top){
                             top = o.available_volume
                         }
@@ -76,7 +76,7 @@ export default function OrderBook() {
     return (
         <>
         <div className="main_book">
-            <div className="header">
+            <div className="header title">
                 <p>Wallet Orders Book</p>
                 <div>
                     <select onChange={(e) => {setRowsCount(parseInt(e.target.value))}} className="numrows">

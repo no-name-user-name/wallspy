@@ -64,14 +64,7 @@ input {
 
 
 
-.graph-panel {
-  display: flex;
-  flex-direction: column;
-  width: calc(100% - 360px + 75px);
-  background-color: #04020d;
-  color: white;
-  padding: 15px 20px;
-}
+
 
 .graph-panel .head {
   display: flex;
@@ -216,6 +209,12 @@ input {
   }
   body{
         background: #04020d;
+  }
+
+  .title{
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
   }
 }
 

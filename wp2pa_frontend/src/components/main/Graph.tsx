@@ -182,12 +182,12 @@ export default function Graph(){
                     getActivityStats()
                     
                     const actions = json_data.actions as ActivityTickRef[]
-                    let bank = [] 
+                    let bank = [] as ActivityTickRef[]
                     for (let each of actions){
                         each['nodeRef'] = createRef()
                         bank.push(each)
                     }
-                    setActList(bank)
+                    setActList(current => [...current, ... bank])
 				}
 			}
 		};
@@ -241,8 +241,6 @@ export default function Graph(){
         }
     }, [actList])
     
-
-
     useEffect(() => {
         getLastActions()
         getActivityStats()
@@ -256,8 +254,6 @@ export default function Graph(){
             main_ws.close()
         }
     }, []) 
-    
-
 
     const options1 = {
         autoSize: true,
@@ -342,6 +338,7 @@ export default function Graph(){
 
     return (<>
             <div className="graph-panel">
+                
                 <div className="head">
                     <div className="pair-info">
                         <p className="pair">TON/USDT</p>

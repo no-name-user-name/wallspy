@@ -21,7 +21,13 @@
 
 
 @media screen and (max-width: 600px) {
-
+    .graph-panel {
+        display: flex;
+        flex-direction: column;
+        background-color: #04020d;
+        color: white;
+        margin-bottom: 35px;
+      }
 
     .graph-panel{
         width: 100%;
