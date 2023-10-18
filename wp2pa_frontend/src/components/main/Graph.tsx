@@ -1,12 +1,18 @@
-import React, {useEffect, useRef, useState, useLayoutEffect, ForwardedRef, RefAttributes} from 'react';
+import React, {useEffect, useRef, useState, useLayoutEffect, ForwardedRef, RefAttributes, createRef} from 'react';
 
 import {UTCTimestamp, ISeriesApi, LineWidth, CrosshairMode, ColorType, IChartApi} from 'lightweight-charts';
 import {Chart, CandlestickSeries, LineSeries, HistogramSeries, ChartProps} from 'lightweight-charts-react-wrapper';
 import { dayPercent, fetchJSON, timeToLocal} from '../../utils/Utils';
 import { ENDPOIN, WS_ENDPOINT } from '../../settings';
 
+import {
+    CSSTransition,
+    TransitionGroup,
+} from 'react-transition-group';
+
 import '../../assets/css/GraphPanel.css';
 import { OkxTicker } from '../../types/okx';
+import { ActivityStats, ActivityTick, ActivityTickRef } from '../../types/activity';
 
 
 interface CandleHistory{
@@ -26,8 +32,11 @@ export default function Graph(){
 	const [candleHistory, setCandleHistory] = useState<CandleHistory[]>([]);
 	const candleSeries = useRef<ISeriesApi<'Candlestick'>>(null);
     const [activityHistory, setActivityHistory] = useState<ActivityHistory[]>([]);
-	const lineSeries = useRef<ISeriesApi<'Line'>>(null);
     const [lastPrice, setLastPrice] = useState<number>()
+    const [acticity24h, setActicity24h] = useState<number>(0)
+    const [rates, setRates] = useState<OkxTicker>()
+    const [actList, setActList] = useState<ActivityTickRef[]>([])
+
 	const histogramSeries = useRef<ISeriesApi<'Histogram'>>(null);
 
     const chart1 = useRef<IChartApi>(null);
@@ -158,14 +167,22 @@ export default function Graph(){
 			let json_data = JSON.parse(event.data)			
 			if (json_data.hasOwnProperty('type')){
 				if (json_data.type === 'activity_subscribe'){
+                    let i = 0
                     for (let el of json_data.data){
+                        
                         try {
                             histogramSeries.current?.update({time: timeToLocal(el.time) as UTCTimestamp, value: el.value})
+                            i ++
                         } catch (error) {
                             console.log(error)
                         }
                     }
                     fitCharts()
+                    getActivityStats()
+                    
+                    const actions = json_data.actions
+                    actions['nodeRef'] = createRef()
+                    setActList(current=> [...current, ...actions as ActivityTickRef[]])
 				}
 			}
 		};
@@ -178,8 +195,6 @@ export default function Graph(){
         }
         return socket
     }
-
-    const [rates, setRates] = useState<OkxTicker>()
     
     function getPairTicker(){
         fetchJSON('https://www.okx.com/api/v5/market/ticker?instId=TON-USDT-SWAP')
@@ -190,7 +205,42 @@ export default function Graph(){
         })
     }
 
+    function getActivityStats(){
+        fetchJSON(ENDPOIN + '/api/v1/market/actions/stats/')
+        .then(result => {
+            const data = result.data as ActivityStats
+            setActicity24h(data.count24h)
+        })
+        
+    }
+
+    function getLastActions(){
+        fetchJSON(ENDPOIN + '/api/v1/market/actions/last/')
+        .then(result => {
+            let bank = [] as ActivityTickRef[]
+            for (let each of result.actions){
+                each['nodeRef'] = createRef()
+                bank.push(each)
+            }
+            setActList(bank)
+        })
+    }
+
+    useEffect(() => {     
+        if (actList.length >= 20){
+            setActList(curr => 
+                curr.filter(el => {
+                    return el.id !== curr[curr.indexOf(actList[0])].id
+                })
+            ) 
+        }
+    }, [actList])
+    
+
+
     useEffect(() => {
+        getLastActions()
+        getActivityStats()
         getPairTicker()
         getCandleHistory()
         const okx_ws = wsUpdateCandle()
@@ -200,8 +250,9 @@ export default function Graph(){
             okx_ws.close()
             main_ws.close()
         }
+    }, []) 
+    
 
-    }, [])
 
     const options1 = {
         autoSize: true,
@@ -209,6 +260,10 @@ export default function Graph(){
             autoScale: true,
 			visible: true,
 			borderColor: '#f0f2f5',
+            alignLabels: false,
+            borderVisible: false,
+            entireTextOnly: true,
+            ticksVisible: true
 		},
 		layout: {
 			background: { type: ColorType.Solid, color: '#04020d' },
@@ -230,68 +285,95 @@ export default function Graph(){
 		}
 	}
 
-    return (<>
+    function getTime(timeStamp: number){
+        return new Date(timeStamp * 1000).toLocaleTimeString()
 
+    }
+
+    function getActivityInfo(data: ActivityTickRef){
+        switch (data.action_type) {
+            case 'price_change':
+                if ((data.new_price!==null)&&(data.old_price!==null)){
+
+                    if (data.new_price > data.old_price){
+                        return `⬆️ Price: ${data.old_price} => ${data.new_price}`
+                    }
+                    else{
+                        return `⬇️ Price: ${data.old_price} => ${data.new_price}`
+                    }
+                }
+                break;
+
+            case "offer_add":
+                return `➕ Add new offer`
+
+            case "offer_delete":
+                return `➖ Delete offer`
+
+            case "volume_change":
+                if ((data.new_volume!==null)&&(data.old_volume!==null)){
+                    switch (data.offer_type) {
+                        case 'PURCHASE':
+                            if (data.new_volume > data.old_volume){
+                                return `⬆️ Volume ${data.old_volume.toFixed(2)} => ${data.new_volume.toFixed(2)}`
+                            }
+                            else{
+                                return `💲 Buy ${(data.old_volume-data.new_volume).toFixed(2)} TON`
+                            }
+                    
+                        case 'SALE':
+                            if (data.new_volume > data.old_volume){
+                                return `⬆️ Volume ${data.old_volume.toFixed(2)} => ${data.new_volume.toFixed(2)}`
+                            }
+                            else{
+                                return `💲 Sell ${(data.old_volume-data.new_volume).toFixed(2)} TON`
+                            }
+                    }
+                }
+                break;
+        }    
+        return ''
+    }
+
+    return (<>
             <div className="graph-panel">
-                
                 <div className="head">
                     <div className="pair-info">
                         <p className="pair">TON/USDT</p>
                         <div className="p-box" >
-                            <p className="price">$ {rates?.last}</p>
+                            <p className="price">${rates?.last}</p>
                             <p className="day-percent">{rates&&lastPrice?dayPercent(parseFloat(rates?.open24h), lastPrice):''}</p>
                         </div>
                     </div>
         
-                    <div className="right-box">
-                        {/* <div className="pair-volume-token1">
-                            <p className="day-volume-token1">90000 BUSD</p>
-                            <p>24h volume</p>
-                        </div> */}
-        
+                    <div className="right-box">        
                         <div className="pair-volume-token2">
-                            <p className="day-volume-token2">1900 BTC</p>
-                            <p>24h actions</p>
+                            <p className="day-volume-token2">{acticity24h}</p>
+                            <p>24h actions counter</p>
                         </div>
                     </div>
                 </div>
-        
-                {/* <div className="graph-settings">
-                    <select className="graph-type">
-                        <option>Chart</option>
-                        <option>Chart1</option>
-                        <option>Chart2</option>
-                    </select>
-                    
-                    <select className="graph-interval">
-                        <option>1 Day</option>
-                        <option>1 Day</option>
-                        <option>1 Day</option>
-                    </select>
-                </div> */}
-                
+                        
                 <div className="main-graph">
                     <div className="graph">
 
                     <div className='wrapper'>
-                        <div className="header">OKX Token Price</div>
+                        <div className="header">Token Price</div>
                             <div className='price'>
                                 <Chart ref={chart1} {...options1} >
                                     <CandlestickSeries
                                         data={candleHistory}
                                         reactive={true}
                                         ref={candleSeries}
-                                        // priceScaleId="right"
                                     />
                                 </Chart>
                             </div>
 
-                        <div className="header">Wallet Activity</div>
+                        <div className="header fixthis">Wallet Activity</div>
                             <div className='activity'>
                                 <Chart ref={chart2} {...options1} >
                                     <HistogramSeries
                                         data={activityHistory}
-                                        // priceScaleId="right"
                                         reactive={true}
                                         ref={histogramSeries}
                                         color="#26a69a"
@@ -300,8 +382,47 @@ export default function Graph(){
                         </div>
                     </div>
                 </div>
+                </div>
+
+
+                <div className='head live-actions-title'>Live actions</div>
+                <div className='live-action-box'>
+                    <div className='actions-wrap'>
+                        <div className='blocks'>
+
+                            <TransitionGroup className="action-block">
+                                {actList.map((row) => (
+                                    <CSSTransition
+                                    key={row.id}
+                                    nodeRef={row.nodeRef}
+                                    timeout={2000}
+                                    classNames="item"
+                                    >
+                                        <div ref={row.nodeRef} className='element'>
+                                            <table>
+                                            <thead></thead> 
+                                            <tbody>
+                                                <tr className="py-5">
+                                                    <td className="" >
+                                                        <img alt={row.user_avatar_code} src={`https://walletbot.me/static/images/alias/${row.user_avatar_code}.svg`}/>
+                                                         {row.user_name}
+                                                    </td>
+                                                    <td className="time" >{getTime(row.timestamp)}</td>
+                                                </tr>
+                                                <tr className="py-5">
+                                                    <td className="" >{getActivityInfo(row)}</td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </CSSTransition>
+                                ))}
+                            </TransitionGroup>
+
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
         </>
     )
 

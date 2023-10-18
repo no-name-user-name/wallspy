@@ -1569,7 +1569,7 @@
     flex-wrap: nowrap;
     flex-direction: column;
     justify-content: center;
-    padding: 0 10px;
+    /* padding: 0 10px; */
   }
   
   .book_panel{
@@ -1727,5 +1727,15 @@
     .smile-info p{
       padding: 0;
       margin: 0;
+    }
+
+    .spliter{
+      margin: 3px 5px;
+      height: 1px;
+      box-shadow: 0 0 6px 1px #add8e64d;
+      background: #add8e640;
+    }
+    .user{
+      display: none;
     }
   }

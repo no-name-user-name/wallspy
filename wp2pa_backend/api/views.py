@@ -7,8 +7,7 @@ from django.db.models import QuerySet
 from django.http import JsonResponse
 from rest_framework import viewsets
 
-from parser.models import MarketData
-from parser.models import MarketAction
+from parser.models import MarketAction, WalletTransaction, MarketData
 from parser.serializers import MarketActionSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -29,6 +28,7 @@ class MarketActionViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset[:100]
 
+
 # activity data for graphs {time:timestamp, value: num} format
 @api_view(['GET'])
 def export_activity(request):
@@ -37,7 +37,10 @@ def export_activity(request):
 
     if stamp:
         data: [MarketAction] = list(MarketAction.objects.all().filter(timestamp__gte=stamp))
-        rows = [each.timestamp for each in data]
+        txs: [WalletTransaction] = list(WalletTransaction.objects.all().filter(timestamp__gte=stamp))
+        rows = [each.timestamp for each in data] + [each.timestamp for each in txs]
+
+        rows.sort()
 
         prev_time = 0
         counter = 0
@@ -68,34 +71,39 @@ def export_activity(request):
 
 
 @api_view(['GET'])
+def get_last_actions(request):
+    rows: [MarketAction] = list(MarketAction.objects.all())[-10:]
+
+    actions = [{
+        "id": row.id,
+        "order_id": row.order_id,
+        "action_type": row.action_type,
+        "user_id": row.user_id,
+        "user_name": row.user_name,
+        "user_avatar_code": row.user_avatar_code,
+        "old_price": row.old_price,
+        "new_price": row.new_price,
+        "offer_type": row.offer_type,
+        "old_volume": row.old_volume,
+        "new_volume": row.new_volume,
+        "timestamp": row.timestamp,
+    } for row in rows]
+    out = {'type': 'last_actions', 'actions': actions}
+
+    return JsonResponse(out)
+
+
+@api_view(['GET'])
 def export_activity_stats(request):
-    data: [MarketAction] = list(MarketAction.objects.all().filter(timestamp__gte=stamp))
-    rows = [each.timestamp for each in data]
+    # daly activity counter
+    now = int(time.mktime(datetime.datetime.now().date().timetuple()))
+    data: [MarketAction] = list(MarketAction.objects.all().filter(timestamp__gte=now))
+    txs: [WalletTransaction] = list(WalletTransaction.objects.all().filter(timestamp__gte=now))
+    count24h = len(data) + len(txs)
 
-    prev_time = 0
-    counter = 0
-    period = 60 * 5
-    result = []
-    next_time = 0
-
-    for s in rows:
-        div = s % period
-        next_time = s - div
-
-        if prev_time != next_time:
-            if prev_time != 0:
-                result.append({'time': next_time, 'value': counter})
-
-            prev_time = next_time
-            counter = 1
-
-        else:
-            counter += 1
-
-    if next_time == prev_time and next_time != 0:
-        result.append({'time': next_time + period, 'value': counter})
-
-    out = {'data': result}
+    out = {'data': {
+        'count24h': count24h
+    }}
 
     return JsonResponse(out)
 

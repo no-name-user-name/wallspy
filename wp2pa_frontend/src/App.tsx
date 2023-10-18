@@ -7,6 +7,7 @@ import Book from './views/Orderbook';
 import Exchanges from './views/Exchanges';
 import Orderbook from './views/Orderbook';
 import Activity from './views/Activity';
+import Test from './views/Test';
 
 
 function App() {
@@ -17,7 +18,8 @@ function App() {
         <Route path='/'>
           <Route index element={<Book/>} />
           <Route path='orderbook' element={<Orderbook />} />
-          <Route path='reserves' element={<Home />} />
+          {/* <Route path='reserves' element={<Home />} /> */}
+          <Route path='reserves' element={<Test />} />
           <Route path='activity' element={<Activity />} />
           <Route path='exchanges' element={<Exchanges />} />
           <Route path='dash' element={<Home />} />

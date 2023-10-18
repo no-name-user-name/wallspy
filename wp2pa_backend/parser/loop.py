@@ -1,4 +1,4 @@
-import json
+import requests
 import os
 import pickle
 import threading
@@ -10,31 +10,7 @@ from wallet.rest import Wallet
 from wallet.types import Action, ActionTypes, Offer
 from wallet.web_client import Client
 
-from .models import MarketData
-
-from .models import MarketAction
-
-
-# def send_market_action(ma, t):
-#     for user in myconf.subscribers:
-#         try:
-#             data = {
-#                 'id': ma.id,
-#                 'order_id': ma.order_id,
-#                 'action_type': ma.action_type,
-#                 'full_action_type': t,
-#                 'user_id': ma.user_id,
-#                 'user_name': ma.user_name,
-#                 'user_avatar_code': ma.user_avatar_code,
-#                 'old_price': ma.old_price,
-#                 'new_price': ma.new_price,
-#                 'offer_type': ma.offer_type,
-#                 'timestamp': ma.timestamp,
-#             }
-#             result = {'type': 'new_action', 'data': data}
-#             user.send(json.dumps(result))
-#         except Exception as e:
-#             print(f"[!] Error send market action: {e}")
+from .models import MarketAction, WalletTransaction, MarketData
 
 
 def token_update(delay=60 * 10):
@@ -56,208 +32,183 @@ def token_update(delay=60 * 10):
             time.sleep(10)
 
 
-#
-#
-memory = {
-    'offer_price_percent': {},
-    'prev_offer_price_percent': {}
-}
+prev_offers = None
+
+
+def to_fixed(x, y):
+    return float("{:.2f}".format(x))
+
+
+def wallet_tx_update():
+    while 1:
+        try:
+            prev_txs: list[WalletTransaction] = list(WalletTransaction.objects.all().order_by('-id')[:100])
+
+            new_txs = requests.get(
+                'https://api.ton.cat/v2/contracts/address/EQBDanbCeUqI4_v-xrnAN0_I2wRvEIaLg1Qg2ZN5c6Zl1KOh'
+                '/transactions?limit=100&offset=0').json()
+
+            if new_txs:
+                new_txs.reverse()
+
+            i = 0
+            for tx in new_txs:
+                account = tx['account']
+                tx_hash = tx['hash']
+                timestamp = tx['utime']
+
+                if len([pt for pt in prev_txs if pt.hash == tx_hash]) != 0:
+                    continue
+
+                if tx['out_msgs']:
+                    is_income = False
+                    source = tx['out_msgs'][0]['source']
+                    destination = tx['out_msgs'][0]['destination']
+                    value = tx['out_msgs'][0]['value']
+
+                else:
+                    is_income = True
+                    source = tx['in_msg']['source']
+                    destination = tx['in_msg']['destination']
+                    value = tx['in_msg']['value']
+
+                WalletTransaction(
+                    account=account,
+                    source=source,
+                    destination=destination,
+                    is_income=is_income,
+                    value=value,
+                    hash=tx_hash,
+                    timestamp=timestamp
+                ).save()
+                i += 1
+            print(f'[*] Saved {i} new txs')
+
+        except Exception as e:
+            print(f"[!] Tonscan loop error: {e}")
+
+        finally:
+            time.sleep(5)
 
 
 def actions_handler(bid_offers, ask_offers, market_price):
-    offers: [Offer] = bid_offers + ask_offers
+    global prev_offers
 
-    for o in offers:
-        memory['offer_price_percent'] = {}
-        offer_price_percent = round(o.price / market_price * 100, 1)
-        memory['offer_price_percent'][o.id] = offer_price_percent
+    current_offers: [Offer] = bid_offers + ask_offers
 
-        # price change
-        for cur_offer in offers:
-            if cur_offer.id in memory['prev_offer_price_percent'] and cur_offer.id in memory['offer_price_percent']:
-                cur_price = memory['offer_price_percent'][cur_offer.id]
-                prev_price = memory['prev_offer_price_percent'][cur_offer.id]
+    for offer in current_offers:
+        offer.price = to_fixed(offer.price, 2)
+        offer.profit_percent = to_fixed(offer.price / market_price * 100, 2)
 
-                if cur_price > prev_price:
-                    ma = MarketAction(
-                        order_id=cur_offer.id,
-                        action_type=ActionTypes.price_change,
-                        user_id=cur_offer.user.userId,
-                        user_name=cur_offer.user.nickname,
-                        user_avatar_code=cur_offer.user.avatar_code,
-                        old_price=prev_price,
-                        new_price=cur_price,
-                        offer_type=cur_offer.type,
-                        timestamp=int(time.time())
-                    )
-                    ma.save()
-                    # send_market_action(ma, 'price_increase')
+    if prev_offers is None:
+        prev_offers = current_offers
+        return
 
-                    print(f"Price up: {prev_price} => {cur_price}")
+    for prev in prev_offers:
+        curr = [offer for offer in current_offers if prev.id == offer.id]
+        if not curr:
+            MarketAction(
+                order_id=prev.id,
+                action_type=ActionTypes.offer_delete,
+                user_id=prev.user.userId,
+                user_name=prev.user.nickname,
+                user_avatar_code=prev.user.avatar_code,
+                offer_type=prev.type,
+                timestamp=int(time.time())
+            ).save()
+            print(f'[-] Delete offer | {prev.user.nickname}')
 
-                elif cur_price < prev_price:
-                    ma = MarketAction(
-                        order_id=cur_offer.id,
-                        action_type=ActionTypes.price_change,
-                        user_id=cur_offer.user.userId,
-                        user_name=cur_offer.user.nickname,
-                        user_avatar_code=cur_offer.user.avatar_code,
-                        old_price=prev_price,
-                        new_price=cur_price,
-                        offer_type=cur_offer.type,
-                        timestamp=int(time.time())
-                    )
-                    ma.save()
-                    # send_market_action(ma, 'price_decrease')
-                    print(f"Price down: {prev_price} => {cur_price}")
+    for curr in current_offers:
+        prev = [offer for offer in prev_offers if offer.id == curr.id]
+        if prev:
+            prev = prev[0]
 
-    if 'prev_offers' in memory:
-        prev_offers: list[Offer] = memory['prev_offers']
-
-        # del pos
-        for prev_offer in prev_offers:
-            flag = False
-            for cur_offer in offers:
-                if cur_offer.id == prev_offer.id:
-                    flag = True
-                    break
-
-            if not flag:
-                ma = MarketAction(
-                    order_id=prev_offer.id,
-                    action_type=ActionTypes.offer_delete,
-                    user_id=prev_offer.user.userId,
-                    user_name=prev_offer.user.nickname,
-                    user_avatar_code=prev_offer.user.avatar_code,
-                    # old_price=prev_price,
-                    # new_price=cur_price,
-                    offer_type=prev_offer.type,
+            if curr.profit_percent > 0.2 + prev.profit_percent and curr.price != prev.price:
+                MarketAction(
+                    order_id=curr.id,
+                    action_type=ActionTypes.price_change,
+                    user_id=curr.user.userId,
+                    user_name=curr.user.nickname,
+                    user_avatar_code=curr.user.avatar_code,
+                    old_price=prev.price,
+                    new_price=curr.price,
+                    offer_type=curr.type,
                     timestamp=int(time.time())
+                ).save()
+                print(f'[^] Price up {prev.price} => {curr.price} | '
+                      f'{prev.profit_percent}% => {curr.profit_percent}% | '
+                      f'{curr.user.nickname}')
 
-                )
-                ma.save()
-                # send_market_action(ma, ActionTypes.offer_delete)
-
-                print('Offer delete')
-
-        # add pos
-        for cur_offer in offers:
-            flag = False
-            for prev_offer in prev_offers:
-                if cur_offer.id == prev_offer.id:
-                    flag = True
-                    break
-            if not flag:
-                ma = MarketAction(
-                    order_id=cur_offer.id,
-                    action_type=ActionTypes.offer_add,
-                    user_id=cur_offer.user.userId,
-                    user_name=cur_offer.user.nickname,
-                    user_avatar_code=cur_offer.user.avatar_code,
-                    # old_price=prev_price,
-                    # new_price=cur_price,
-                    offer_type=cur_offer.type,
+            elif curr.profit_percent + 0.2 < prev.profit_percent and curr.price != prev.price:
+                MarketAction(
+                    order_id=curr.id,
+                    action_type=ActionTypes.price_change,
+                    user_id=curr.user.userId,
+                    user_name=curr.user.nickname,
+                    user_avatar_code=curr.user.avatar_code,
+                    old_price=prev.price,
+                    new_price=curr.price,
+                    offer_type=curr.type,
                     timestamp=int(time.time())
-                )
-                ma.save()
-                # send_market_action(ma, ActionTypes.offer_add)
+                ).save()
+                print(f'[^] Price down {curr.price} => {prev.price} | '
+                      f'{curr.profit_percent}% => {prev.profit_percent}% | '
+                      f'{curr.user.nickname}')
 
-                print('Offer added')
+            elif curr.available_volume > prev.available_volume:
+                MarketAction(
+                    order_id=curr.id,
+                    action_type=ActionTypes.volume_change,
+                    user_id=curr.user.userId,
+                    user_name=curr.user.nickname,
+                    user_avatar_code=curr.user.avatar_code,
+                    old_volume=prev.available_volume,
+                    new_volume=curr.available_volume,
+                    offer_type=curr.type,
+                    timestamp=int(time.time())
+                ).save()
+                print(f'[^] Volume up {prev.available_volume} => {curr.available_volume} | {curr.user.nickname}')
 
-        # volume edit
-        for cur_offer in offers:
-            for prev_offer in prev_offers:
-                if cur_offer.id == prev_offer.id:
-                    cur_vol = cur_offer.available_volume
-                    prev_vol = prev_offer.available_volume
-                    offer_type = cur_offer.type
+            elif curr.available_volume < prev.available_volume:
+                MarketAction(
+                    order_id=curr.id,
+                    action_type=ActionTypes.volume_change,
+                    user_id=curr.user.userId,
+                    user_name=curr.user.nickname,
+                    user_avatar_code=curr.user.avatar_code,
+                    old_volume=prev.available_volume,
+                    new_volume=curr.available_volume,
+                    offer_type=curr.type,
+                    timestamp=int(time.time())
+                ).save()
 
-                    if offer_type == 'PURCHASE':
+                if curr.type == 'SALE':
+                    print(f'[$] Sale {prev.available_volume - curr.available_volume} TON | {curr.user.nickname}')
+                else:
+                    print(f'[$] Buy {prev.available_volume - curr.available_volume} TON | {curr.user.nickname}')
 
-                        if cur_vol > prev_vol:
+        else:
+            MarketAction(
+                order_id=curr.id,
+                action_type=ActionTypes.offer_add,
+                user_id=curr.user.userId,
+                user_name=curr.user.nickname,
+                user_avatar_code=curr.user.avatar_code,
+                offer_type=curr.type,
+                timestamp=int(time.time())
+            ).save()
+            print(f'[+] New offer | {curr.user.nickname}')
 
-                            ma = MarketAction(
-                                order_id=cur_offer.id,
-                                action_type=ActionTypes.volume_change,
-                                user_id=cur_offer.user.userId,
-                                user_name=cur_offer.user.nickname,
-                                user_avatar_code=cur_offer.user.avatar_code,
-                                old_volume=prev_vol,
-                                new_volume=cur_vol,
-                                offer_type=offer_type,
-                                timestamp=int(time.time())
-                            )
-                            ma.save()
-                            # send_market_action(ma, 'increase_volume')
-
-                            print(f'Increase volume {prev_vol} => {cur_vol}')
-
-                        elif cur_vol < prev_vol:
-
-                            ma = MarketAction(
-                                order_id=cur_offer.id,
-                                action_type=ActionTypes.volume_change,
-                                user_id=cur_offer.user.userId,
-                                user_name=cur_offer.user.nickname,
-                                user_avatar_code=cur_offer.user.avatar_code,
-                                old_volume=prev_vol,
-                                new_volume=cur_vol,
-                                offer_type=offer_type,
-                                timestamp=int(time.time())
-                            )
-                            ma.save()
-                            # send_market_action(ma, 'decrease_volume_or_buy')
-
-                            print(
-                                f'Decrease volume {prev_vol} => {cur_vol}, or buy {round(prev_vol - cur_vol, 2)} TON')
-
-                    else:
-                        if cur_vol > prev_vol:
-
-                            ma = MarketAction(
-                                order_id=cur_offer.id,
-                                action_type=ActionTypes.volume_change,
-                                user_id=cur_offer.user.userId,
-                                user_name=cur_offer.user.nickname,
-                                user_avatar_code=cur_offer.user.avatar_code,
-                                old_volume=prev_vol,
-                                new_volume=cur_vol,
-                                offer_type=offer_type,
-                                timestamp=int(time.time())
-                            )
-                            ma.save()
-                            # send_market_action(ma, 'increase_volume')
-
-                            print(f'Increase volume {prev_vol} => {cur_vol}')
-
-                        elif cur_vol < prev_vol:
-
-                            ma = MarketAction(
-                                order_id=cur_offer.id,
-                                action_type=ActionTypes.volume_change,
-                                user_id=cur_offer.user.userId,
-                                user_name=cur_offer.user.nickname,
-                                user_avatar_code=cur_offer.user.avatar_code,
-                                old_volume=prev_vol,
-                                new_volume=cur_vol,
-                                offer_type=offer_type,
-                                timestamp=int(time.time())
-                            )
-
-                            ma.save()
-                            # send_market_action(ma, 'decrease_volume_or_sell')
-
-                            print(
-                                f'Decrease volume {prev_vol} => {cur_vol}, or sell {round(prev_vol - cur_vol, 2)} TON')
-
-    memory['prev_offers'] = offers
-    memory['prev_offer_price_percent'] = memory['offer_price_percent']
+    prev_offers = current_offers
 
 
 def activate(delay=10):
     print('[*] Activate')
 
     token = ''
+    addr_parser = threading.Thread(target=wallet_tx_update)
+    addr_parser.daemon = True
+    addr_parser.start()
 
     t = threading.Thread(target=token_update)
     t.daemon = True
@@ -278,7 +229,7 @@ def activate(delay=10):
             w = Wallet(auth_token=token)
             bid_offers = w.get_p2p_market('TON', 'RUB', 'SALE')
             ask_offers = w.get_p2p_market('TON', 'RUB', 'PURCHASE')
-            market_price = w.get_rate()
+            market_price = to_fixed(w.get_rate(), 2)
 
             row = MarketData.objects.all().first()
 

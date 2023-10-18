@@ -89,18 +89,33 @@ export default function OrderBook() {
             </div>
             <div className="offers">
                 <BookHead/>
+                <div className="spliter"></div>
+
                 <div className="book_asks">
                     <BookRows data={marketAsks} topVolume={topVolume} type='asks' />
                 </div>
+                <div className="spliter"></div>
                 <div className="book_bids">
                     <BookRows data={marketBids} topVolume={topVolume} type='bids' />
                 </div>
+
+                {/* <div className="book_row panel_decorate">
+                    <div className="book_table">Good 💚</div>
+                    <div className="book_table">Normal 🔸</div>
+                    <div className="book_table">Scam ❌</div>
+                </div> */}
             </div>  
-            <div className="smile-info">
+            
+            {/* <div className="book_row panel_decorate">
+                <div className="book_table">Good 💚</div>
+                <div className="book_table">Normal 🔸</div>
+                <div className="book_table">Scam ❌</div>
+            </div> */}
+            {/* <div className="smile-info">
                 <p>Good 💚</p>    
                 <p>Normal 🔸</p>    
                 <p>Scam ❌</p>    
-            </div>          
+            </div>           */}
         </div>
         </>
     )

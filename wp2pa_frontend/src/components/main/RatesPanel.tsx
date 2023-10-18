@@ -29,7 +29,7 @@ export default function RatesPanel(){
         <><div className="rates-panel">
             <div className="head row">
                 <div className="logo-name">
-                    <p>Wallet Activity</p>
+                    <p>Wallet Tokes</p>
                 </div>
                 <div className="sort-box">
                     <select disabled={true}>

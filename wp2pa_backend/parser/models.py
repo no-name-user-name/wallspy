@@ -39,3 +39,13 @@ class MarketAction(models.Model):
     new_volume = models.FloatField(null=True)
     timestamp = models.IntegerField()
 
+
+class WalletTransaction(models.Model):
+    id = models.AutoField(primary_key=True)
+    account = models.TextField()
+    source = models.TextField()
+    destination = models.TextField()
+    is_income = models.BooleanField(default=True)
+    hash = models.TextField()
+    timestamp = models.IntegerField()
+    value = models.TextField()

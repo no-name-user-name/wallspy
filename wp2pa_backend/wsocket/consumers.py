@@ -5,7 +5,7 @@ import threading
 import time
 
 from channels.generic.websocket import WebsocketConsumer
-from parser.models import MarketAction, MarketData
+from parser.models import MarketAction, MarketData, WalletTransaction
 from wallet.types import Offer
 
 from parser.utils import obj_to_dict
@@ -68,22 +68,25 @@ def update_market(delay=2.5):
 
 # action subscription
 def update_actions(delay=1):
-    last_id = 0
+    last_actions_id = 0
+    last_tx_id = 0
     while 1:
         try:
-            rows = MarketAction.objects.filter(timestamp__gte=int(time.time()) - 10 * 60)
+            now = int(time.time()) - 10 * 60
+            actions = MarketAction.objects.all().filter(timestamp__gte=now)
+            txs = WalletTransaction.objects.all().filter(timestamp__gte=now)
 
-            if last_id == 0:
-                last_id = rows.last().id
+            if last_tx_id == 0 or last_actions_id == 0:
+                last_actions_id = actions.last().id
+                last_tx_id = txs.last().id
                 continue
 
-            rows = list(rows)
+            if last_tx_id == txs.last().id and last_actions_id == actions.last().id:
+                continue
 
-            if rows:
-                if last_id == rows[-1].id:
-                    continue
+            if txs or actions:
 
-                actions = [{
+                action_details = [{
                     "id": row.id,
                     "order_id": row.order_id,
                     "action_type": row.action_type,
@@ -96,27 +99,37 @@ def update_actions(delay=1):
                     "old_volume": row.old_volume,
                     "new_volume": row.new_volume,
                     "timestamp": row.timestamp,
-                } for row in rows if row.id > last_id]
+                } for row in actions if row.id > last_actions_id]
 
-                last_id = rows[-1].id
+                txs_details = [{
+                    "id": t.id,
+                    "account": t.account,
+                    "source": t.source,
+                    "destination": t.destination,
+                    "is_income": t.is_income,
+                    "hash": t.hash,
+                    "timestamp": t.timestamp,
+                    "value": t.value
+                } for t in txs if t.id > last_tx_id]
 
-                times = [each.timestamp for each in rows]
+                last_tx_id = txs.last().id
+                last_actions_id = actions.last().id
+
+                times = [each.timestamp for each in txs] + [each.timestamp for each in actions]
+                times.sort()
 
                 prev_time = 0
                 counter = 0
                 period = 60 * 5
                 next_time = 0
-
                 result = []
 
                 for s in times:
                     div = s % period
                     next_time = s - div
-
                     if prev_time != next_time:
                         if prev_time != 0:
                             result.append({'time': next_time, 'value': counter})
-
                         prev_time = next_time
                         counter = 1
 
@@ -126,16 +139,15 @@ def update_actions(delay=1):
                 if next_time == prev_time and next_time != 0:
                     result.append({'time': next_time + period, 'value': counter})
 
-                stamps = {'type': 'activity_subscribe', 'data': result[-2:], 'actions': actions}
+                stamps = {'type': 'activity_subscribe', 'data': [result[-1]],
+                          'actions': action_details, 'txs': txs_details}
 
                 for conn in connections:
-                    for user in conn.get_market_subs():
+                    for user in conn.get_action_subs():
                         user.send(json.dumps(stamps))
 
         except Exception as e:
             print(f"[*] Error actions update: {e}")
-            raise
-
         finally:
             time.sleep(delay)
 
