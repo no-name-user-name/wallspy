@@ -98,24 +98,7 @@ export default function OrderBook() {
                 <div className="book_bids">
                     <BookRows data={marketBids} topVolume={topVolume} type='bids' />
                 </div>
-
-                {/* <div className="book_row panel_decorate">
-                    <div className="book_table">Good 💚</div>
-                    <div className="book_table">Normal 🔸</div>
-                    <div className="book_table">Scam ❌</div>
-                </div> */}
             </div>  
-            
-            {/* <div className="book_row panel_decorate">
-                <div className="book_table">Good 💚</div>
-                <div className="book_table">Normal 🔸</div>
-                <div className="book_table">Scam ❌</div>
-            </div> */}
-            {/* <div className="smile-info">
-                <p>Good 💚</p>    
-                <p>Normal 🔸</p>    
-                <p>Scam ❌</p>    
-            </div>           */}
         </div>
         </>
     )

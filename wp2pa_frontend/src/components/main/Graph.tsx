@@ -13,6 +13,7 @@ import {
 import '../../assets/css/GraphPanel.css';
 import { OkxTicker } from '../../types/okx';
 import { ActivityStats, ActivityTick, ActivityTickRef } from '../../types/activity';
+import { MarketOffer, MarketOfferRef } from '../../types/offers';
 
 
 interface CandleHistory{
@@ -180,9 +181,13 @@ export default function Graph(){
                     fitCharts()
                     getActivityStats()
                     
-                    const actions = json_data.actions
-                    actions['nodeRef'] = createRef()
-                    setActList(current=> [...current, ...actions as ActivityTickRef[]])
+                    const actions = json_data.actions as ActivityTickRef[]
+                    let bank = [] 
+                    for (let each of actions){
+                        each['nodeRef'] = createRef()
+                        bank.push(each)
+                    }
+                    setActList(bank)
 				}
 			}
 		};
