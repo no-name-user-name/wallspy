@@ -1,3 +1,6 @@
+import {UTCTimestamp} from 'lightweight-charts';
+
+
 interface OkxTicker{
     instType: "SPOT" | "SWAP" | "FUTURES" | "OPTION",
     instId: string,
@@ -17,4 +20,12 @@ interface OkxTicker{
     sodUtc8: string,
 }
 
-export type {OkxTicker}
+interface CandleHistory{
+	time: UTCTimestamp,
+	open: number,
+	high: number,
+	low: number,
+	close: number
+}
+
+export type {OkxTicker, CandleHistory}

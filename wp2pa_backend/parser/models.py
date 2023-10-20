@@ -49,3 +49,9 @@ class WalletTransaction(models.Model):
     hash = models.TextField()
     timestamp = models.IntegerField()
     value = models.TextField()
+
+
+class Balance(models.Model):
+    id = models.AutoField(primary_key=True)
+    value = models.IntegerField()
+    timestamp = models.IntegerField()

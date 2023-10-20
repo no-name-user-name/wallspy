@@ -10,7 +10,7 @@ from wallet.rest import Wallet
 from wallet.types import Action, ActionTypes, Offer
 from wallet.web_client import Client
 
-from .models import MarketAction, WalletTransaction, MarketData
+from .models import MarketAction, WalletTransaction, MarketData, Balance
 
 
 def token_update(delay=60 * 10):
@@ -20,7 +20,7 @@ def token_update(delay=60 * 10):
             # client = Client.auth('main')
 
             # for old tg connection
-            client = Client('main')
+            client = Client(headless=True)
 
             token = client.get_token()
             os.environ['wallet_token'] = token
@@ -40,10 +40,20 @@ def to_fixed(x, y):
 
 
 def wallet_tx_update():
+    next_balance_parser_time = 0
     while 1:
         try:
-            prev_txs: list[WalletTransaction] = list(WalletTransaction.objects.all().order_by('-id')[:100])
+            if time.time() > next_balance_parser_time:
+                next_balance_parser_time = time.time() + 60 * 10
+                r = requests.get('https://toncenter.com/api/v2/getWalletInformation?address=EQBDanbCeUqI4_v'
+                                 '-xrnAN0_I2wRvEIaLg1Qg2ZN5c6Zl1KOh').json()
 
+                Balance(
+                    value=int(r['result']['balance']),
+                    timestamp=time.time()
+                ).save()
+
+            prev_txs: list[WalletTransaction] = list(WalletTransaction.objects.all().order_by('-id')[:100])
             new_txs = requests.get(
                 'https://api.ton.cat/v2/contracts/address/EQBDanbCeUqI4_v-xrnAN0_I2wRvEIaLg1Qg2ZN5c6Zl1KOh'
                 '/transactions?limit=100&offset=0').json()
@@ -205,10 +215,11 @@ def actions_handler(bid_offers, ask_offers, market_price):
     prev_offers = current_offers
 
 
-def activate(delay=10):
+def activate(delay=3):
     print('[*] Activate')
 
     token = ''
+
     addr_parser = threading.Thread(target=wallet_tx_update)
     addr_parser.daemon = True
     addr_parser.start()
@@ -230,7 +241,9 @@ def activate(delay=10):
             token = os.environ['wallet_token']
 
             w = Wallet(auth_token=token)
+            time.sleep(3)
             bid_offers = w.get_p2p_market('TON', 'RUB', 'SALE')
+            time.sleep(3)
             ask_offers = w.get_p2p_market('TON', 'RUB', 'PURCHASE')
             market_price = to_fixed(w.get_rate(), 2)
 

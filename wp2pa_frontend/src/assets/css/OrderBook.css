@@ -1600,7 +1600,7 @@
   }
   .panel_info{
     background-color: #00000026;
-  
+    color: #ccc;
   }
   .filler_green{
     position: absolute;
@@ -1648,7 +1648,7 @@
       width: 100%;
     }
     .panel_decorate{
-      padding: 5px;
+      padding: 4px 0;
     }
   }
   
@@ -1669,6 +1669,18 @@
     position: relative;
     overflow: hidden;
     cursor: pointer;
+    color: rgb(204, 204, 204);
+    animation-fill-mode: forwards;
+  }
+
+  .row_animate{
+    animation-duration: 3s; 
+    animation-name: blink; 
+ }
+
+  @keyframes blink {
+    from {color: #ff8f00;}
+    to {color: rgb(204, 204, 204);}
   }
 
   .red{
@@ -1684,6 +1696,10 @@
 
 
   @media screen and (max-width: 600px) {
+    .container{
+      color:whitesmoke;
+    }
+
     .stats{
       /* width: 60%; */
     }
@@ -1710,12 +1726,12 @@
     }
     
     .numrows {
-      background: #04020d;
+      background: #211f28;
       width: 100px;
       text-align: center;
       text-align-last: center;
       height: 30px;
-      border: 1px solid rgba(100,150,200,.5);
+      color: #ccc;
     }
     .panel_decorate{
       margin: 4px;
@@ -1736,7 +1752,7 @@
     }
 
     .spliter{
-      margin: 3px 5px;
+      margin: 0px 5px;
       height: 1px;
       box-shadow: 0 0 6px 1px #add8e64d;
       background: #add8e640;

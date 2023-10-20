@@ -33,8 +33,9 @@ export default function Header(){
                             <i className="fa-solid fa-arrow-right-arrow-left"></i>
                         </div>
 
-                        <div onClick={()=>{navigate('/dash')}} className={path=="/dash"?'btn fire btn-select':'btn fire'}>
-                            <i className="fa-solid fa-fire"></i>
+                        <div onClick={()=>{navigate('/dash')}} className={path=="/dash"?'btn btn-select':'btn'}>
+                            {/* <i className="fa-solid fa-fire"></i> */}
+                            <i className="fa-solid fa-user"></i>
                         </div>
 
                     </div>

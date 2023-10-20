@@ -25,3 +25,23 @@ def obj_to_dict(obj):
                 new_dict[key] = obj_to_dict(obj.__dict__[key])
 
     return new_dict
+
+
+def obj_to_dict_gpt(obj):
+    classes = {int, float, str}
+
+    if isinstance(obj, list):
+        new_dict = [e if type(e) in classes else obj_to_dict(e) for e in obj]
+    elif obj is None:
+        new_dict = None
+    else:
+        new_dict = {}
+        for key, value in obj.items():
+            if type(value) in classes:
+                new_dict[key] = value
+            elif value is None:
+                new_dict[key] = None
+            else:
+                new_dict[key] = obj_to_dict(value)
+
+    return new_dict

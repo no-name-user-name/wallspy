@@ -56,10 +56,10 @@ export default function Home(){
                 
                 <div className="main-graph">
                     <div className="graph">
-                        <Graph/>
+                        {/* <Graph/> */}
                     </div>
                     <div className="order-book">
-                        <OrderBook/>
+                        {/* <OrderBook/> */}
                     </div>
                 </div>
 

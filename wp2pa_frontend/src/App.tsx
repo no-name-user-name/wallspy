@@ -8,6 +8,7 @@ import Exchanges from './views/Exchanges';
 import Orderbook from './views/Orderbook';
 import Activity from './views/Activity';
 import Test from './views/Test';
+import Reserves from './views/Reserves';
 
 
 function App() {
@@ -19,7 +20,7 @@ function App() {
           <Route index element={<Book/>} />
           <Route path='orderbook' element={<Orderbook />} />
           {/* <Route path='reserves' element={<Home />} /> */}
-          <Route path='reserves' element={<Test />} />
+          <Route path='reserves' element={<Reserves />} />
           <Route path='activity' element={<Activity />} />
           <Route path='exchanges' element={<Exchanges />} />
           <Route path='dash' element={<Home />} />

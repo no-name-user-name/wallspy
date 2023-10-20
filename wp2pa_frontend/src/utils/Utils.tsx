@@ -1,3 +1,5 @@
+import { MarketOfferRef } from "../types/offers";
+
 async function fetchJSON(url: string, method='GET', json_data=null) {
     let headers = {
         'Content-type': 'application/json',
@@ -40,7 +42,28 @@ function dayPercent(open: number, current: number){
     return result >= 0? '+' + result.toFixed(2) + '%' : '' + result.toFixed(2) + '%'
 }
 
-export {fetchJSON, timeToLocal, openLink, dayPercent}
+function sortByPrice(data: MarketOfferRef[], reverse: boolean = false){
+    let sortedData;
+
+    sortedData = data.sort(function(a,b){
+        let x = a.price
+        let y = b.price
+        if (!reverse){
+            if(x>y){return 1;}
+            if(x<y){return -1;}
+            return 0;
+        }
+        else{
+            if(x<y){return 1;}
+            if(x>y){return -1;}
+            return 0;
+        }
+        
+    });
+    return sortedData;
+}
+
+export {fetchJSON, timeToLocal, openLink, dayPercent, sortByPrice}
 
 
 

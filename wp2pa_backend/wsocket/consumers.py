@@ -8,7 +8,7 @@ from channels.generic.websocket import WebsocketConsumer
 from parser.models import MarketAction, MarketData, WalletTransaction
 from wallet.types import Offer
 
-from parser.utils import obj_to_dict
+from parser.utils import obj_to_dict, obj_to_dict_gpt
 from .ws_types import Connection
 
 action_subscribers = []
@@ -17,6 +17,34 @@ connections: list[Connection] = []
 thread_actions = None
 thread_market = None
 thread_alive_checker = None
+
+
+def get_diffs(dict1, dict2):
+    keys = set(dict1.keys()).union(set(dict2.keys()))
+    differences = {}
+    for key in keys:
+        if dict1.get(key) != dict2.get(key):
+            differences[key] = [dict1.get(key), dict2.get(key)]
+    return differences
+
+
+def get_update_list(curr, prev):
+    result = []
+    for cb in curr:
+        search = [pb for pb in prev if pb.id == cb.id]
+        if search:
+            diffs = get_diffs(obj_to_dict(cb), obj_to_dict(search[0]))
+            if diffs:
+                result.append(obj_to_dict(cb))
+        else:
+            result.append(obj_to_dict(cb))
+
+    for pb in prev:
+        search = [cb for cb in curr if cb.id == pb.id]
+        if not search:
+            pb.available_volume = 0
+            result.append(obj_to_dict(pb))
+    return result
 
 
 # delete all 'sleeping' connections
@@ -37,29 +65,49 @@ def alive_checker():
 
 
 # market subscription
-def update_market(delay=2.5):
+def update_market(delay=1):
     prev_content = None
     while 1:
         try:
             row = MarketData.objects.first()
             content = {
-                'type': 'market_subscribe',
-                'data': {
-                    'asks': [obj_to_dict(a) for a in pickle.loads(row.bid_offers)],
-                    'bids': [obj_to_dict(b) for b in pickle.loads(row.ask_offers)]
-                }
+                'asks': [a for a in pickle.loads(row.bid_offers)],
+                'bids': [b for b in pickle.loads(row.ask_offers)]
             }
 
-            if content == prev_content:
+            if prev_content is None:
+                prev_content = content
                 continue
 
+            prev_asks: list[Offer] = prev_content['asks']
+            prev_bids: list[Offer] = prev_content['bids']
+
+            curr_asks: list[Offer] = content['asks']
+            curr_bids: list[Offer] = content['bids']
+
+            bids_update_list = get_update_list(curr_bids, prev_bids)
+            asks_update_list = get_update_list(curr_asks, prev_asks)
+
             prev_content = content
+
+            if not bids_update_list and not asks_update_list:
+                # print('----')
+                continue
+
+            content = {
+                'type': 'market_subscribe',
+                'data': {
+                    'asks': asks_update_list,
+                    'bids': bids_update_list,
+                }
+            }
 
             for conn in connections:
                 for user in conn.get_market_subs():
                     user.send(json.dumps(content))
 
         except Exception as e:
+            raise
             print(f"[!] Update Market Error: {e}")
 
         finally:

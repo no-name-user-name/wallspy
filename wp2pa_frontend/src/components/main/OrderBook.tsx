@@ -1,78 +1,15 @@
-import { useEffect, useState } from "react"
 
-import '../../assets/css/OrderBook.css';
-import { WS_ENDPOINT } from "../../settings";
+import React from "react";
+import { MarketOfferRef } from "../../types/offers";
 import {BookRows, BookHead} from "../orderBook/BookRow";
-import { MarketOfferRef, MarketPack } from "../../types/offers";
 
+export default function OrderBook(props:{marketAsks:MarketOfferRef[], marketBids:MarketOfferRef[], rowsCount:number, setRowsCallback:React.Dispatch<React.SetStateAction<number>>}) {
 
-export default function OrderBook() {
-    const [marketBids, setMarketBids] = useState<MarketOfferRef[]>([]);
-    const [marketAsks, setMarketAsks] = useState<MarketOfferRef[]>([]);
-    const [rowsCount, setRowsCount] = useState(10)
-    const [topVolume, setTopVolume] = useState(0);
-
-
-    useEffect(() => {
-        const socket = new WebSocket(WS_ENDPOINT + '/ws/');
-        let interval: NodeJS.Timer | null = null;
-		
-        socket.onopen = function() {
-            interval = setInterval(()=>{
-                const msg = {
-                    "method": "ping"
-                }
-                this.send(JSON.stringify(msg))
-            }, 15 * 1000)
-
-
-			let msg = {
-				"method": "market_subscribe"
-			}
-			this.send(JSON.stringify(msg))
-		};
-
-        socket.onmessage = function(event) {
-			let json_data = JSON.parse(event.data)		
-
-			if (json_data.hasOwnProperty('type')){
-				if (json_data.type === 'market_subscribe'){
-                    const data = json_data.data
-                    
-                    let asks = data.asks.slice(0, rowsCount)
-                    let bids = data.bids.slice(0, rowsCount)
-
-                    setMarketBids(bids)
-                    setMarketAsks(asks)
-
-                    let top = topVolume
-                    for(const o of asks as MarketOfferRef[]){
-                        if (o.available_volume > top){
-                            top = o.available_volume
-                        }
-                    }
-                    for(const o of bids as MarketOfferRef[]){
-                        if (o.available_volume > top){
-                            top = o.available_volume
-                        }
-                    }
-                    setTopVolume(top)
-				}
-			}
-		};
-        socket.onclose = function(event) {
-            if (interval !== null){
-                clearInterval(interval)
-            }
-		};
-
-
-        return () => {
-            socket.close()
-            console.log('Ws closed')
-        }
-    }, [rowsCount])
-
+    const setRowsCount = props.setRowsCallback
+    const marketAsks = props.marketAsks
+    const marketBids = props.marketBids
+    const rowsCount = props.rowsCount
+    
     return (
         <>
         <div className="main_book">
@@ -92,11 +29,11 @@ export default function OrderBook() {
                 <div className="spliter"></div>
 
                 <div className="book_asks">
-                    <BookRows data={marketAsks} topVolume={topVolume} type='asks' />
+                    <BookRows asksOffers={marketAsks} bidsOffers={marketBids} count={rowsCount} type='asks' />
                 </div>
                 <div className="spliter"></div>
                 <div className="book_bids">
-                    <BookRows data={marketBids} topVolume={topVolume} type='bids' />
+                    <BookRows asksOffers={marketAsks} bidsOffers={marketBids}  count={rowsCount} type='bids' />
                 </div>
             </div>  
         </div>

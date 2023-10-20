@@ -198,14 +198,35 @@ input {
   overflow: hidden;
 }
 
+.remove-btn {
+  margin-right: 0.5rem;
+}
 
+.item-enter {
+  /* opacity: 0; */
+}
+.item-enter-active {
+  /* opacity: 1; */
+  /* transition: opacity 200ms ease-in; */
+}
+.item-exit {
+  /* opacity: 1; */
+}
+.item-exit-active {
+  /* opacity: 0; */
+  /* transition: opacity 200ms ease-in; */
+}
+
+.hidden{
+  display: none;
+}
 
 @media screen and (max-width: 600px) {
   .container{
     /* height: 100%; */
     /* position: absolute; */
     /* width: 100%; */
-    padding: 0 30px;
+    padding: 0 20px;
   }
   body{
         background: #04020d;
