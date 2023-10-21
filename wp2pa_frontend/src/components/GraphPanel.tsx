@@ -32,8 +32,6 @@ export default function GraphPanel(){
         let interval: NodeJS.Timer | null = null;
 
         socket.onopen = function() {
-            console.log('[+] okx ws open')
-
             interval = setInterval(()=>{
                 this.send('ping')
             }, 20 * 1000)
@@ -80,8 +78,6 @@ export default function GraphPanel(){
             if (interval !== null){
                 clearInterval(interval)
             }
-            console.log('[-] okx ws closed')
-
 		};
 
         socket.onerror = function(error){
@@ -107,7 +103,6 @@ export default function GraphPanel(){
 			setCandleHistory(ch)
             getWalletActionsHistory(ch[0].time-offset - 60 * 60 * 3)
             fitCharts()
-
         })
     }
 
@@ -128,7 +123,6 @@ export default function GraphPanel(){
         let interval: NodeJS.Timer | null = null;
 		
         socket.onopen = function() {
-            console.log('[+] main ws open')
             interval = setInterval(()=>{
                 const msg = {
                     "method": "ping"

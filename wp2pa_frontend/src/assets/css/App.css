@@ -159,7 +159,7 @@ input {
 }
 .graph .activity{
   height: 190px;
-  transform: translate(10px, 10px);
+  /* transform: translate(10px, 10px); */
 }
 
 .graph .wrapper{
@@ -178,7 +178,6 @@ input {
 
 .wrapper .header{
   text-align: left;
-  margin: 15px 0 0;
   font: status-bar;
 }
 

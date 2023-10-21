@@ -1,10 +1,16 @@
-import { ActivityStats } from "../../types/activity"
+import {ColorType} from 'lightweight-charts';
+import {Chart, CandlestickSeries, HistogramSeries, AreaSeries} from 'lightweight-charts-react-wrapper';
 
-export default function ReservesPanel(props:{balance:number, tokenPrice: number, balanceDelta:ActivityStats}) {
+import { ActivityStats } from "../../types/activity"
+import { TxPeriodData } from "../../types/txs"
+
+
+export default function ReservesPanel(props:{balance:number, tokenPrice: number, balanceDelta:ActivityStats, periodData: TxPeriodData}) {
     const USD = Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD'
     })
+    const periodData = props.periodData
     const balance = props.balance
     const tokenPrice = props.tokenPrice
     const balanceDelta = props.balanceDelta
@@ -13,8 +19,51 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
     const positivBalanceDelta = '+' + USD.format(balanceDelta.balance.income / 10 ** 9).replaceAll(',', ' ').replace('$', '') + ' TON'
     const negativeBalanceDelta = '-' + USD.format(balanceDelta.balance.outcome / 10 ** 9).replaceAll(',', ' ').replace('$', '') + ' TON'
     const txCount = balanceDelta.txs.income_count+balanceDelta.txs.outcome_count
-    const inTxPercent = (balanceDelta.txs.income_count / (txCount) * 100).toFixed(2)
-    const outTxPercent = (balanceDelta.txs.outcome_count / (balanceDelta.txs.income_count+balanceDelta.txs.outcome_count) * 100).toFixed(2)
+
+    let inTxPercent = '0'
+    let outTxPercent = '0'
+
+    if (txCount!==0){
+        inTxPercent = (balanceDelta.txs.income_count / (txCount) * 100).toFixed(2)
+        outTxPercent = (balanceDelta.txs.outcome_count / (balanceDelta.txs.income_count+balanceDelta.txs.outcome_count) * 100).toFixed(2)
+    }
+    
+    const PriceFormat = {
+        TON: (price: number) => USD.format(price / 10 ** 9).replaceAll(',', ' ').replace('$', '') + ' TON',
+    };
+
+    const options = {
+        autoSize: true,
+		rightPriceScale: {
+            autoScale: true,
+			visible: true,
+			borderColor: '#f0f2f5',
+            alignLabels: false,
+            borderVisible: false,
+            entireTextOnly: true,
+            ticksVisible: true
+		},
+		layout: {
+			background: { type: ColorType.Solid, color: '#04020d' },
+			textColor: '#f0f2f5',
+            fontSize: 10
+		},
+		grid: {
+			horzLines: {
+				color: 'rgba(197, 203, 206, 0.1)',
+			},
+			vertLines: {
+				color: 'rgba(197, 203, 206, 0.1)',
+			},
+		},
+		timeScale: {
+			borderColor: 'rgba(197, 203, 206, 1)',
+			timeVisible: true,
+            rightOffset: 1
+		},
+        handleScroll: false,
+        handleScale: false
+	}
 
     return (
         <>
@@ -22,6 +71,7 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
             <div className="header title">
                 <p>Wallet Reserves</p>
             </div>
+            
             <div className="res-data">
                <div className="balances">
                     <div className="content left">
@@ -64,6 +114,25 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
                     </div>
                </div>
             </div>  
+
+            
+        </div>
+
+        <div className="reserves-graph">
+            <div className="header">Balance 30D</div>
+
+            <div className='graph-box'>
+                <Chart {...options} localization={{priceFormatter: PriceFormat['TON']}}>
+
+                    <AreaSeries
+                        data={periodData.data.balance}
+                        lineWidth={2}
+                        crosshairMarkerVisible={false}
+                    />
+                    
+                </Chart>
+
+            </div>
         </div>
         </>
     )

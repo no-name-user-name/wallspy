@@ -65,33 +65,73 @@ def alive_checker():
 
 
 # market subscription
+# def update_market(delay=1):
+#     prev_content = None
+#     while 1:
+#         try:
+#             row = MarketData.objects.first()
+#             content = {
+#                 'asks': [a for a in pickle.loads(row.bid_offers)],
+#                 'bids': [b for b in pickle.loads(row.ask_offers)]
+#             }
+#
+#             if prev_content is None:
+#                 prev_content = content
+#                 continue
+#
+#             prev_asks: list[Offer] = prev_content['asks']
+#             prev_bids: list[Offer] = prev_content['bids']
+#
+#             curr_asks: list[Offer] = content['asks']
+#             curr_bids: list[Offer] = content['bids']
+#
+#             bids_update_list = get_update_list(curr_bids, prev_bids)
+#             asks_update_list = get_update_list(curr_asks, prev_asks)
+#
+#             prev_content = content
+#
+#             if not bids_update_list and not asks_update_list:
+#                 continue
+#
+#             content = {
+#                 'type': 'market_subscribe',
+#                 'data': {
+#                     'asks': asks_update_list,
+#                     'bids': bids_update_list,
+#                 }
+#             }
+#
+#             for conn in connections:
+#                 for user in conn.get_market_subs():
+#                     user.send(json.dumps(content))
+#
+#         except Exception as e:
+#             print(f"[!] Update Market Error: {e}")
+#
+#         finally:
+#             time.sleep(delay)
+
+
 def update_market(delay=1):
     prev_content = None
-    while 1:
+    while True:
         try:
-            row = MarketData.objects.first()
+            row = MarketData.objects.only('bid_offers', 'ask_offers').first()
             content = {
-                'asks': [a for a in pickle.loads(row.bid_offers)],
-                'bids': [b for b in pickle.loads(row.ask_offers)]
+                'asks': pickle.loads(row.bid_offers),
+                'bids': pickle.loads(row.ask_offers)
             }
 
             if prev_content is None:
                 prev_content = content
                 continue
 
-            prev_asks: list[Offer] = prev_content['asks']
-            prev_bids: list[Offer] = prev_content['bids']
-
-            curr_asks: list[Offer] = content['asks']
-            curr_bids: list[Offer] = content['bids']
-
-            bids_update_list = get_update_list(curr_bids, prev_bids)
-            asks_update_list = get_update_list(curr_asks, prev_asks)
+            bids_update_list = get_update_list(content['bids'], prev_content['bids'])
+            asks_update_list = get_update_list(content['asks'], prev_content['asks'])
 
             prev_content = content
 
             if not bids_update_list and not asks_update_list:
-                # print('----')
                 continue
 
             content = {
@@ -107,7 +147,6 @@ def update_market(delay=1):
                     user.send(json.dumps(content))
 
         except Exception as e:
-            raise
             print(f"[!] Update Market Error: {e}")
 
         finally:
@@ -121,8 +160,8 @@ def update_actions(delay=1):
     while 1:
         try:
             now = int(time.time()) - 10 * 60
-            actions = MarketAction.objects.all().filter(timestamp__gte=now)
-            txs = WalletTransaction.objects.all().filter(timestamp__gte=now)
+            actions = MarketAction.objects.filter(timestamp__gte=now)
+            txs = WalletTransaction.objects.filter(timestamp__gte=now)
 
             if last_tx_id == 0 or last_actions_id == 0:
                 last_actions_id = actions.last().id
@@ -270,7 +309,6 @@ class PresenceConsumer(WebsocketConsumer):
                     }
                 }
                 self.send(json.dumps(content))
-
                 connections[connections.index(ip)].market_subscribe(port)
 
     def disconnect(self, code):

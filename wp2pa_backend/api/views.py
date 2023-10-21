@@ -33,10 +33,12 @@ def export_activity(request):
     out = {'data': []}
 
     if stamp:
-        data: [MarketAction] = list(MarketAction.objects.all().filter(timestamp__gte=stamp))
-        txs: [WalletTransaction] = list(WalletTransaction.objects.all().filter(timestamp__gte=stamp))
-        rows = [each.timestamp for each in data] + [each.timestamp for each in txs]
+        data: [MarketAction] = MarketAction.objects.filter(timestamp__gte=stamp)
+        txs: [WalletTransaction] = WalletTransaction.objects.filter(timestamp__gte=stamp)
 
+        rows = []
+        rows.extend(data.values_list('timestamp', flat=True))
+        rows.extend(txs.values_list('timestamp', flat=True))
         rows.sort()
 
         prev_time = 0
@@ -52,63 +54,74 @@ def export_activity(request):
             if prev_time != next_time:
                 if prev_time != 0:
                     result.append({'time': next_time, 'value': counter})
-
                 prev_time = next_time
                 counter = 1
-
             else:
                 counter += 1
 
         if next_time == prev_time and next_time != 0:
             result.append({'time': next_time + period, 'value': counter})
-
         out = {'data': result}
-
     return JsonResponse(out)
 
 
 def export_month_transactions(request):
-    days_before = (date.today()-timedelta(days=30)).timetuple()
-    timestamp = int(time.mktime(days_before))
+    period = request.GET.get("period")
 
-    # txs: [WalletTransaction] = list(WalletTransaction.objects.filter(timestamp__gte=timestamp))
-    # balances: [WalletTransaction] = list(Balance.objects.filter(timestamp__gte=timestamp))
-    # t_txs = [each.timestamp for each in txs]
-    # t_balances = [each.timestamp for each in txs]
-    #
-    # i = [each.timestamp for each in txs]
-    #
-    # rows.sort()
-    #
-    # prev_time = 0
-    # counter = 0
-    # period = 60 * 60 * 24
-    # result = []
-    # next_time = 0
-    #
-    # for s in rows:
-    #     div = s % period
-    #     next_time = s - div
-    #
-    #     if prev_time != next_time:
-    #         if prev_time != 0:
-    #             result.append({'time': next_time, 'value': counter})
-    #
-    #         prev_time = next_time
-    #         counter = 1
-    #
-    #     else:
-    #         counter += 1
-    #
-    # if next_time == prev_time and next_time != 0:
-    #     result.append({'time': next_time + period, 'value': counter})
-    #
-    # out = {'data': result}
+    if period and period == '30d':
+
+        days_before = (datetime.date.today() - timedelta(days=30)).timetuple()
+        timestamp = int(time.mktime(days_before))
+        txs: [WalletTransaction] = WalletTransaction.objects.filter(timestamp__gte=timestamp)
+        balances: [Balance] = Balance.objects.filter(timestamp__gte=timestamp)
+
+        daily_balance = {}
+        daily_income = {}
+        daily_outcome = {}
+
+        for b in balances:
+            timestamp = b.timestamp
+            value = int(b.value)
+
+            _date = timestamp - (timestamp % (60 * 60))
+            # _date = datetime.datetime.fromtimestamp(timestamp).date()
+
+            if _date not in daily_income:
+                daily_balance[_date] = 0
+            daily_balance[_date] += value
+
+        for tx in txs:
+            timestamp = tx.timestamp
+            is_income = tx.is_income
+            value = int(tx.value)
+            _date = datetime.datetime.fromtimestamp(timestamp).date()
+            if is_income:
+                if _date not in daily_income:
+                    daily_income[_date] = 0
+                daily_income[_date] += value
+
+            else:
+                if _date not in daily_outcome:
+                    daily_outcome[_date] = 0
+                daily_outcome[_date] += value
+
+        out = {
+            'data': {
+                'income': [
+                    {'value': daily_income[d], 'time': d} for d in daily_income],
+                'outcome': [
+                    {'value': daily_outcome[d], 'time': d} for d in daily_outcome],
+                'balance': [
+                    {'value': daily_balance[d], 'time': d} for d in daily_balance
+                ]
+            }
+        }
+        return JsonResponse(out)
 
 
 @api_view(['GET'])
 def get_last_actions(request):
-    rows: [MarketAction] = list(MarketAction.objects.all())[-10:]
+    rows = MarketAction.objects.order_by('-id')[:10]
 
     actions = [{
         "id": row.id,
@@ -124,6 +137,7 @@ def get_last_actions(request):
         "new_volume": row.new_volume,
         "timestamp": row.timestamp,
     } for row in rows]
+
     out = {'type': 'last_actions', 'actions': actions}
 
     return JsonResponse(out)
@@ -131,10 +145,9 @@ def get_last_actions(request):
 
 @api_view(['GET'])
 def export_activity_stats(request):
-    # daly activity counter
     now = int(time.mktime(datetime.datetime.now().date().timetuple()))
-    data: [MarketAction] = list(MarketAction.objects.all().filter(timestamp__gte=now))
-    txs: [WalletTransaction] = list(WalletTransaction.objects.all().filter(timestamp__gte=now))
+    data: [MarketAction] = list(MarketAction.objects.filter(timestamp__gte=now))
+    txs: [WalletTransaction] = list(WalletTransaction.objects.filter(timestamp__gte=now))
     count24h = len(data) + len(txs)
 
     income_txs = [int(tx.value) for tx in txs if tx.is_income]

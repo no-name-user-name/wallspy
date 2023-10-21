@@ -21,9 +21,6 @@ function BookRows(props: {asksOffers: MarketOfferRef[], bidsOffers: MarketOfferR
     let colorClass = 'green'
     let asks = props.asksOffers.slice(0, props.count).reverse()
     let bids = props.bidsOffers.slice(0, props.count).reverse()
-    // data = data.slice(0, props.count)
-    // data = data.slice(0, props.count)
-    // data = data.reverse()
     let data = [] as MarketOfferRef[]
     if (props.type === 'asks'){
         colorClass = 'red'

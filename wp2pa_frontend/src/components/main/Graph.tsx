@@ -13,10 +13,6 @@ import { ActivityHistory, ActivityTickRef } from '../../types/activity';
 import { CandleHistory, OkxTicker } from '../../types/okx';
 
 
-
-
-
-
 export default function Graph(props:{rates:OkxTicker, lastPrice:number, acticity24h: number, 
     chart1:any, chart2:any, candleHistory:CandleHistory[], 
     candleSeries:any, activityHistory: ActivityHistory[]
@@ -38,6 +34,38 @@ export default function Graph(props:{rates:OkxTicker, lastPrice:number, acticity
 		rightPriceScale: {
             autoScale: true,
 			visible: true,
+			borderColor: '#f0f2f5',
+            alignLabels: false,
+            borderVisible: false,
+            entireTextOnly: true,
+            ticksVisible: true
+		},
+		layout: {
+			background: { type: ColorType.Solid, color: '#04020d' },
+			textColor: '#f0f2f5',
+            fontSize: 10
+		},
+		grid: {
+			horzLines: {
+				color: 'rgba(197, 203, 206, 0.1)',
+			},
+			vertLines: {
+				color: 'rgba(197, 203, 206, 0.1)',
+			},
+		},
+		timeScale: {
+			borderColor: 'rgba(197, 203, 206, 1)',
+			timeVisible: true,
+            rightOffset: 1
+		},
+        handleScroll: false,
+        handleScale: false
+	}
+    const options2 = {
+        autoSize: true,
+		rightPriceScale: {
+            autoScale: true,
+			visible: false,
 			borderColor: '#f0f2f5',
             alignLabels: false,
             borderVisible: false,
@@ -153,7 +181,7 @@ export default function Graph(props:{rates:OkxTicker, lastPrice:number, acticity
 
                         <div className="header fixthis">Wallet Activity</div>
                             <div className='activity'>
-                                <Chart ref={chart2} {...options1} >
+                                <Chart ref={chart2} {...options2} >
                                     <HistogramSeries
                                         data={activityHistory}
                                         reactive={true}
@@ -178,7 +206,7 @@ export default function Graph(props:{rates:OkxTicker, lastPrice:number, acticity
                                     key={row.id}
                                     nodeRef={row.nodeRef}
                                     timeout={2000}
-                                    classNames="item"
+                                    classNames="rel"
                                     >
                                         <div ref={row.nodeRef} className='element'>
                                             <table>

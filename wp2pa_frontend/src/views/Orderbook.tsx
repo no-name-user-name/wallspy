@@ -133,21 +133,21 @@ export default function Orderbook(){
     }, [animateAsksRef])
     
 
-    return(<>
-            {
-                marketAsks.length>0&&marketBids.length>0&&rowsCount?
-                <><Header />
-                    <div className="container">
+    return(
+    <>
+        {
+            marketAsks.length>0&&marketBids.length>0&&rowsCount?
+            <><Header />
+                <div className="container">
+                <OrderBook
+                        marketAsks={marketAsks}
+                        marketBids={marketBids}
+                        rowsCount={rowsCount}
+                        setRowsCallback={setRowsCount} />
 
-                    <OrderBook
-                            marketAsks={marketAsks}
-                            marketBids={marketBids}
-                            rowsCount={rowsCount}
-                            setRowsCallback={setRowsCount} />
+                </div></>:<PageLoader />
+        }
 
-                    </div></>:<PageLoader />
-            }
-
-
-            </>);
+    </>
+);
 }

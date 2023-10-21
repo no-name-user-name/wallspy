@@ -5,8 +5,8 @@
     margin-top: 10px;
 
 }.rates-panel {
-    background: #EBF0F4;
-    padding: 15px 20px;
+    /* background: #EBF0F4; */
+    /* padding: 15px 20px; */
     height: -webkit-fill-available;
 }
 .rates-panel .head {
@@ -26,6 +26,7 @@
     font-family: monospace;
   }
   
+
   .logo-name {
     width: 80%;
     font-size: 20px;
@@ -39,6 +40,14 @@
   
 .sort-box select {
     padding: 5px;
+    background: #211f28;
+    /* padding: 10px 10px; */
+    width: 100px;
+    height: 35px;
+  }
+
+  .head .header{
+    margin-bottom: 0
   }
 
   select, .search-bar {
@@ -49,7 +58,7 @@
   }
 
   
-.search-bar {background-color: white;display: flex;align-items: center;height: auto;}
+.search-bar {background-color: #211f28; color: #ccc;display: flex;align-items: center;height: auto;}
 
 .search-bar i {
     padding: 8px;
@@ -61,6 +70,7 @@
     width: 100%;
     border: none;
     border-radius: 5px;
+    background: #ccc;
 }
 
 .rates{
@@ -74,7 +84,7 @@
   
 
 .pair-rate {
-    background: #7F9EBE;
+    background: #211f28;
     border-radius: 5px;
     box-shadow: 0 0 4px #04020d78;
     width: 47%;

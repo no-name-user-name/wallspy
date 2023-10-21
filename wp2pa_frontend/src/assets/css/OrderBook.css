@@ -1585,6 +1585,7 @@
     width: 100%;
     z-index: 1;
     padding: 0 10px
+    
   }
   
   .panel_decorate{
@@ -1671,15 +1672,17 @@
     cursor: pointer;
     color: rgb(204, 204, 204);
     animation-fill-mode: forwards;
+    align-items: center;
   }
 
   .row_animate{
     animation-duration: 3s; 
     animation-name: blink; 
  }
-
+ /* box-shadow: inset 0 0 6px 0px #add8e6; */
   @keyframes blink {
-    from {color: #ff8f00;}
+    from {
+      color: #ff8f00; background: #2a2b2a;}
     to {color: rgb(204, 204, 204);}
   }
 
@@ -1711,6 +1714,7 @@
     }
     .offers{
       width: 100%;
+      font-family: monospace;
     }
     .header{
       display: flex;
@@ -1732,6 +1736,7 @@
       text-align-last: center;
       height: 30px;
       color: #ccc;
+      font-family: monospace;
     }
     .panel_decorate{
       margin: 4px;
