@@ -37,7 +37,11 @@ def export_users_stats(request):
         stats = UserStat.objects.filter(user_id=user.user_id, timestamp__gte=timestamp)
         start_stats: UserStat = stats.first()
         last_stats: UserStat = stats.last()
-        delta = start_stats.total_orders_count - last_stats.total_orders_count
+
+        if float(last_stats.success_percent) < 90:
+            continue
+
+        delta = last_stats.total_orders_count-start_stats.total_orders_count
         users.append({
             'user_id': user.user_id,
             'avatar_code': user.avatar_code,
@@ -56,10 +60,10 @@ def export_users_stats(request):
                 'success_rate': last_stats.success_rate,
             }
         })
-    user_sort = sorted(users, key=lambda x: x['delta'])
+    user_sort = sorted(users, reverse=True, key=lambda x: x['delta'])
     out = {
         'data': {
-            'users': user_sort[0:10],
+            'users': user_sort[0:15],
         }
     }
     return JsonResponse(out)

@@ -62,7 +62,7 @@ function BookRows(props: {asksOffers: MarketOfferRef[], bidsOffers: MarketOfferR
                                     <div className="book_table summary">{(row.price.value * row.availableVolume).toFixed(2)}</div>
 
                                     <div className="book_table user">
-                                        <p>{row.user.nickname.length > 15? row.user.nickname.slice(0,13) + '...': row.user.nickname}</p>
+                                        <p>{row.user.nickname}</p>
                                     </div>
                                     <div className="book_table stats">
                                         {getMark(row.user.statistics.totalOrdersCount, row.user.statistics.successPercent, row.user.isVerified)}

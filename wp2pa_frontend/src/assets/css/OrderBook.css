@@ -1584,7 +1584,7 @@
   .book_table{
     width: 100%;
     z-index: 1;
-    padding: 0 8px
+    padding: 0 6px
     
   }
   
@@ -1683,13 +1683,13 @@
   }
 
   .row_animate{
-    animation-duration: 3s; 
+    animation-duration: 2s; 
     animation-name: blink; 
  }
  /* box-shadow: inset 0 0 6px 0px #add8e6; */
   @keyframes blink {
     from {
-      color: #ff8f00; background: #2a2b2a;}
+      color: #726e6946; background: #2a2b2a;}
     to {color: rgb(204, 204, 204);}
   }
 

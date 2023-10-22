@@ -13,7 +13,7 @@ export default function Users(){
     useEffect(() => {
         fetchJSON(ENDPOIN + '/api/v1/users/stats/')
         .then(result => {
-            setTopList(result.data)
+            setTopList(result.data.users)
         })
     }, [])   
     

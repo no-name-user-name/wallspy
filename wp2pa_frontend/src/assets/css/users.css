@@ -19,16 +19,55 @@
 }
 
 .top-verif{
-    width: 25px;
-    transform: translateY(3px);
+    width: auto;
+    position: relative;
+    height: 19px;
+}
+.ava{
+    width: 14px;
+    padding: 0 5px
+    
 }
 .top-user{
     display: flex;
     align-content: center;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    padding: 6px 10px;
+    background: #211f28;
+    border-radius: 4px;
+    margin-bottom: 4px;
 }
-.top-user{
+.top-user p{
     margin: 0;
     padding: 0;
+}
+.user-name{
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+.user-data{
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.row-name{
+    font-size: 11px;
+    font-family: monospace;
+    font-weight: 600;
+    text-decoration: underline;
+}
+.user-data div{
+    width: 100%;
+    text-align: center;
+}
+.headtable{
+    padding: 13px 10px;
+}
+
+.top-ten{
+    margin-top: 13px;
 }

@@ -5,7 +5,7 @@ import { ActivityStats } from "../../types/activity"
 import { TopTx, Tx, TxPeriodData } from "../../types/txs"
 import { fetchJSON } from '../../utils/Utils';
 import { ENDPOIN } from '../../settings';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import TopAddress from '../reserves/TopAddress';
 
 
@@ -26,12 +26,20 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
 
     let inTxPercent = '0'
     let outTxPercent = '0'
-
+    
     const [top, setTop] = useState<TopTx>()
-    fetchJSON(ENDPOIN + '/api/v1/txs/top')
-    .then(result => {
-        setTop(result.data)
-    })
+    useEffect(() => {
+        fetchJSON(ENDPOIN + '/api/v1/txs/top')
+        .then(result => {
+            setTop(result.data)
+        })
+    
+      return () => {
+        
+      }
+    }, [])
+    
+
 
     if (txCount!==0){
         inTxPercent = (balanceDelta.txs.income_count / (txCount) * 100).toFixed(2)
