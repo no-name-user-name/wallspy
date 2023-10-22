@@ -13,15 +13,17 @@ export default function OrderBook(props:{marketAsks:MarketOfferRef[], marketBids
     return (
         <>
         <div className="main_book">
-            <div className="header title">
-                <p>Wallet Orders Book</p>
-                <div>
-                    <select onChange={(e) => {setRowsCount(parseInt(e.target.value))}} className="numrows">
-                        <option value={10}>10</option>
-                        <option value={20}>20</option>
-                        <option value={30}>30</option>
-                        <option value={100}>100</option>
-                    </select>
+            <div className="head">
+                <div className="header title">
+                    <p>Wallet Orders Book</p>
+                    <div>
+                        <select onChange={(e) => {setRowsCount(parseInt(e.target.value))}} className="numrows">
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={30}>30</option>
+                            <option value={100}>100</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div className="offers">

@@ -6,7 +6,6 @@ export default function Header(){
     const navigate = useNavigate()
 
     const path = window.location.pathname
-    console.log(path)
 
     return(
         <div className="control-panel">
@@ -33,7 +32,7 @@ export default function Header(){
                             <i className="fa-solid fa-arrow-right-arrow-left"></i>
                         </div>
 
-                        <div onClick={()=>{navigate('/dash')}} className={path=="/dash"?'btn btn-select':'btn'}>
+                        <div onClick={()=>{navigate('/users')}} className={path=="/users"?'btn btn-select':'btn'}>
                             {/* <i className="fa-solid fa-fire"></i> */}
                             <i className="fa-solid fa-user"></i>
                         </div>

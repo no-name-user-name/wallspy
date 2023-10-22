@@ -143,7 +143,6 @@ export default function GraphPanel(){
 				if (json_data.type === 'activity_subscribe'){
                     let i = 0
                     for (let el of json_data.data){
-                        
                         try {
                             histogramSeries.current?.update({time: timeToLocal(el.time) as UTCTimestamp, value: el.value})
                             i ++
@@ -232,7 +231,7 @@ export default function GraphPanel(){
 
     return (<>
         {
-            rates&&lastPrice&&acticity24h&&activityHistory.length!=0&&actList.length!=0&&chart1&&chart2?<>
+            rates&&acticity24h&&activityHistory.length!=0&&chart1&&chart2?<>
                 <Header/>
                 <div className="container">
                         <Graph 

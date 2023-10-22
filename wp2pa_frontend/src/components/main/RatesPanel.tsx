@@ -18,10 +18,10 @@ export default function RatesPanel(props:{rates: OkxTicker[]}){
                 </div> */}
 
             </div>
-            <div className="search-bar row">
+            {/* <div className="search-bar row">
                 <i className="fa-solid fa-magnifying-glass"></i>
                 <input disabled={true} placeholder="Search"></input>
-            </div>
+            </div> */}
 
             <div className="rates row">
 

@@ -1584,7 +1584,7 @@
   .book_table{
     width: 100%;
     z-index: 1;
-    padding: 0 10px
+    padding: 0 8px
     
   }
   
@@ -1655,14 +1655,17 @@
   
   .book_table.price{
     text-align: left;  
+    width: fit-content;
   }  
 
   .book_table.volume{
-    text-align: right;  
+    text-align: right;
+    width: 50%;
   }
 
   .book_table.summary{
-    text-align: right;  
+    text-align: right;
+    width: 50%;
   }
 
   .book_row{
@@ -1673,6 +1676,10 @@
     color: rgb(204, 204, 204);
     animation-fill-mode: forwards;
     align-items: center;
+  }
+  .user p{
+    margin: 0;
+    padding: 0;
   }
 
   .row_animate{
@@ -1704,13 +1711,20 @@
     }
 
     .stats{
-      /* width: 60%; */
+      display: inline-flex;
+      flex-direction: row;
+      align-items: center;
+      align-content: center;
+      justify-content: flex-end;
+      width: 55%;
     }
     .nick{
       display: none;
     }
     .user{
       width: 100%;
+      display: flex;
+      justify-content: right;
     }
     .offers{
       width: 100%;
@@ -1739,7 +1753,7 @@
       font-family: monospace;
     }
     .panel_decorate{
-      margin: 4px;
+      margin: 3px 0px;
     }
     .smile-info{
       display: flex;
@@ -1757,12 +1771,9 @@
     }
 
     .spliter{
-      margin: 0px 5px;
+      margin: 0;
       height: 1px;
       box-shadow: 0 0 6px 1px #add8e64d;
       background: #add8e640;
-    }
-    .user{
-      display: none;
     }
   }

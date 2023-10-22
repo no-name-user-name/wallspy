@@ -45,3 +45,12 @@ def obj_to_dict_gpt(obj):
                 new_dict[key] = obj_to_dict(value)
 
     return new_dict
+
+
+def get_diffs(dict1, dict2):
+    keys = set(dict1.keys()).union(set(dict2.keys()))
+    differences = {}
+    for key in keys:
+        if dict1.get(key) != dict2.get(key):
+            differences[key] = [dict1.get(key), dict2.get(key)]
+    return differences

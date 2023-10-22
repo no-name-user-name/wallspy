@@ -36,8 +36,6 @@ export default function Reserves(){
         })
     }, [])   
     
-
-
     return(
         <>
         {

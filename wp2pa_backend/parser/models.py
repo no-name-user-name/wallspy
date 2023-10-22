@@ -4,21 +4,6 @@ from django.db import models
 from django.utils.timezone import now
 
 
-#
-#
-# class Wallet(models.Model):
-#     id = models.AutoField(primary_key=True)
-#     user_id = models.IntegerField()
-#     network = models.CharField(max_length=200)
-#     address = models.CharField(max_length=200)
-#     private_key = models.TextField()
-#     add_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-#     status = models.IntegerField()
-#
-#     def __str__(self):
-#         return self.address
-
-
 class MarketData(models.Model):
     id = models.AutoField(primary_key=True)
     bid_offers = models.BinaryField()
@@ -55,3 +40,22 @@ class Balance(models.Model):
     id = models.AutoField(primary_key=True)
     value = models.IntegerField()
     timestamp = models.IntegerField()
+
+
+class User(models.Model):
+    id = models.AutoField(primary_key=True)
+    nickname = models.CharField(max_length=300)
+    avatar_code = models.CharField(max_length=300)
+    user_id = models.IntegerField()
+    last_activity = models.IntegerField(default=0)
+    is_verified = models.BooleanField()
+
+
+class UserStat(models.Model):
+    id = models.AutoField(primary_key=True)
+    total_orders_count = models.IntegerField()
+    success_percent = models.IntegerField()
+    user_id = models.IntegerField()
+    success_rate = models.CharField(max_length=100)
+    timestamp = models.IntegerField(default=0)
+

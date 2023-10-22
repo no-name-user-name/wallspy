@@ -2,7 +2,11 @@ import {ColorType} from 'lightweight-charts';
 import {Chart, CandlestickSeries, HistogramSeries, AreaSeries} from 'lightweight-charts-react-wrapper';
 
 import { ActivityStats } from "../../types/activity"
-import { TxPeriodData } from "../../types/txs"
+import { TopTx, Tx, TxPeriodData } from "../../types/txs"
+import { fetchJSON } from '../../utils/Utils';
+import { ENDPOIN } from '../../settings';
+import { useState } from 'react';
+import TopAddress from '../reserves/TopAddress';
 
 
 export default function ReservesPanel(props:{balance:number, tokenPrice: number, balanceDelta:ActivityStats, periodData: TxPeriodData}) {
@@ -22,6 +26,12 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
 
     let inTxPercent = '0'
     let outTxPercent = '0'
+
+    const [top, setTop] = useState<TopTx>()
+    fetchJSON(ENDPOIN + '/api/v1/txs/top')
+    .then(result => {
+        setTop(result.data)
+    })
 
     if (txCount!==0){
         inTxPercent = (balanceDelta.txs.income_count / (txCount) * 100).toFixed(2)
@@ -68,8 +78,10 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
     return (
         <>
         <div className="res-block">
-            <div className="header title">
-                <p>Wallet Reserves</p>
+            <div className='head'>
+                <div  className="header title">
+                    <p>Wallet Reserves</p>
+                </div> 
             </div>
             
             <div className="res-data">
@@ -134,6 +146,31 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
 
             </div>
         </div>
+        <div className={top?'top-addresses':'top-addresses hidden'}>
+            <div className='head'>
+                <div  className="header title">
+                    <p>Top deposits per day:</p>
+                </div>
+            </div> 
+            {
+                top?.income.map((el: Tx, i:number)=><>
+                    <TopAddress key={'income-'+el.addr} el={el} counter={i}/>
+                </>)
+            }
+        </div>
+        <div className={top?'top-addresses':'top-addresses hidden'}>
+            <div className='head'>
+                <div  className="header title">
+                    <p>Top withdrawals per day:</p>
+                </div>
+            </div> 
+            {
+                top?.outcome.map((el: Tx, i:number)=><>
+                    <TopAddress key={'outcome-'+el.addr} el={el} counter={i}/>
+                </>)
+            }
+        </div>
+
         </>
     )
 }

@@ -60,21 +60,21 @@ export default function Orderbook(){
             })[0];
 
             if (foundObject){
-                if (row.available_volume == 0){
+                if (row.availableVolume == 0){
                     callback(current => 
                         current.filter(obj => {
                             return obj.id !== row.id
                         })
                     )
                 }
-                else if ((foundObject.available_volume !== row.available_volume)||(foundObject.price !== row.price)||(foundObject.user !== row.user)) {
+                else if ((foundObject.availableVolume !== row.availableVolume)||(foundObject.price !== row.price)||(foundObject.user !== row.user)) {
                     callback(current => 
                         current.map(obj => {
                             if (obj.id === row.id){
                                 if (obj.nodeRef.current){
                                     toAnime.push(obj.nodeRef)
                                 }
-                                return {...obj, available_volume: row.available_volume, price: row.price, user: row.user}
+                                return {...obj, available_volume: row.availableVolume, price: row.price, user: row.user}
                             }   
                             return obj
                         })

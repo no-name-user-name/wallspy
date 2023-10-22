@@ -13,4 +13,18 @@ interface GraphData{
 	value: number,
 }
 
-export type {TxPeriodData, GraphData}
+
+
+interface Tx{
+    addr: String
+    value: number
+    txs_count: number
+}
+
+interface TopTx{
+	income: Tx[],
+	outcome: Tx[],
+}
+
+
+export type {TxPeriodData, GraphData, TopTx, Tx}

@@ -4,10 +4,13 @@ import {
 } from 'react-transition-group';
 import { MarketOfferRef } from "../../types/offers";
 
-function getMark(total: number, percent: number){
+function getMark(total: number, percent: number, isVerified: Boolean){
+    if (isVerified){
+        return `${total} ✅`
+    }
     if (percent > 93)
         if (total > 100){
-            return `${total} 💚`
+            return `${total} 🔸`
         }
     if (total < 20){
         if (percent < 90){
@@ -32,13 +35,13 @@ function BookRows(props: {asksOffers: MarketOfferRef[], bidsOffers: MarketOfferR
 
     let topVolume = 0
     for(const o of asks as MarketOfferRef[]){
-        if (o.available_volume > topVolume){
-            topVolume = o.available_volume
+        if (o.availableVolume > topVolume){
+            topVolume = o.availableVolume
         }
     }
     for(const o of bids as MarketOfferRef[]){
-        if (o.available_volume > topVolume){
-            topVolume = o.available_volume
+        if (o.availableVolume > topVolume){
+            topVolume = o.availableVolume
         }
     }
 
@@ -54,17 +57,18 @@ function BookRows(props: {asksOffers: MarketOfferRef[], bidsOffers: MarketOfferR
                             classNames="item">
                                 
                                 <div ref={row.nodeRef} className="book_row panel_decorate">
-                                    <div className={"book_table price " + colorClass}>{row.price.toFixed(2)}</div>
-                                    <div className="book_table volume">{row.available_volume.toFixed(2)}</div>
-                                    <div className="book_table summary">{(row.price * row.available_volume).toFixed(2)}</div>
+                                    <div className={"book_table price " + colorClass}>{row.price.value.toFixed(2)}</div>
+                                    <div className="book_table volume">{row.availableVolume.toFixed(2)}</div>
+                                    <div className="book_table summary">{(row.price.value * row.availableVolume).toFixed(2)}</div>
 
                                     <div className="book_table user">
-                                        <img width={15} className="Ava" alt="Ava" src={`https://walletbot.me/static/images/alias/${row.user.avatar_code}.svg`}/>
-                                        <p className="nick" style={{margin: 0}}>{row.user.nickname}</p>
+                                        <p>{row.user.nickname.length > 15? row.user.nickname.slice(0,13) + '...': row.user.nickname}</p>
                                     </div>
-                                    <div className="book_table stats">{getMark(row.user.statistics.total_orders_count, row.user.statistics.success_percent)}</div>
+                                    <div className="book_table stats">
+                                        {getMark(row.user.statistics.totalOrdersCount, row.user.statistics.successPercent, row.user.isVerified)}
+                                    </div>
                                     <div className={props.type==='asks'?'filler_red':'filler_green'} 
-                                    style={{ width: row.available_volume/topVolume*100<50?row.available_volume/topVolume*100+row.available_volume/topVolume*100*5:row.available_volume/topVolume*100 + '%'}}></div>
+                                    style={{ width: row.availableVolume/topVolume*100<50?row.availableVolume/topVolume*100+row.availableVolume/topVolume*100*5:row.availableVolume/topVolume*100 + '%'}}></div>
                                 </div>
 
                         </CSSTransition>

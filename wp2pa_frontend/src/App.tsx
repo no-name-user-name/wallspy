@@ -1,14 +1,12 @@
-import React from 'react';
 import {Routes, Route, BrowserRouter} from 'react-router-dom';
 
 import './assets/css/App.css';
-import Home from './views/Home';
 import Book from './views/Orderbook';
 import Exchanges from './views/Exchanges';
 import Orderbook from './views/Orderbook';
 import Activity from './views/Activity';
-import Test from './views/Test';
 import Reserves from './views/Reserves';
+import Users from './views/Users';
 
 
 function App() {
@@ -19,11 +17,10 @@ function App() {
         <Route path='/'>
           <Route index element={<Book/>} />
           <Route path='orderbook' element={<Orderbook />} />
-          {/* <Route path='reserves' element={<Home />} /> */}
           <Route path='reserves' element={<Reserves />} />
           <Route path='activity' element={<Activity />} />
           <Route path='exchanges' element={<Exchanges />} />
-          <Route path='dash' element={<Home />} />
+          <Route path='users' element={<Users />} />
         </Route>
 
       </Routes>

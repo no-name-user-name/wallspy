@@ -3,8 +3,9 @@ import pickle
 import time
 from datetime import date, timedelta
 
+from django.core import serializers
 from django.http import JsonResponse
-from parser.models import MarketAction, WalletTransaction, MarketData, Balance
+from parser.models import MarketAction, WalletTransaction, MarketData, Balance, User, UserStat
 from parser.serializers import MarketActionSerializer
 from parser.utils import obj_to_dict
 from rest_framework import viewsets
@@ -26,7 +27,131 @@ class MarketActionViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset[:100]
 
 
-# activity data for graphs {time:timestamp, value: num} format
+@api_view(['GET'])
+def export_users_stats(request):
+    days_before = (datetime.date.today() - timedelta(days=7)).timetuple()
+    timestamp = int(time.mktime(days_before))
+    active_users = User.objects.filter(last_activity__gte=timestamp)
+    users = []
+    for user in active_users:
+        stats = UserStat.objects.filter(user_id=user.user_id, timestamp__gte=timestamp)
+        start_stats: UserStat = stats.first()
+        last_stats: UserStat = stats.last()
+        delta = start_stats.total_orders_count - last_stats.total_orders_count
+        users.append({
+            'user_id': user.user_id,
+            'avatar_code': user.avatar_code,
+            'last_activity': user.last_activity,
+            'nickname': user.nickname,
+            'is_verified': user.is_verified,
+            'delta': delta,
+            'start_stats': {
+                'total_orders_count': start_stats.total_orders_count,
+                'success_percent': start_stats.success_percent,
+                'success_rate': start_stats.success_rate,
+            },
+            'last_stats': {
+                'total_orders_count': last_stats.total_orders_count,
+                'success_percent': last_stats.success_percent,
+                'success_rate': last_stats.success_rate,
+            }
+        })
+    user_sort = sorted(users, key=lambda x: x['delta'])
+    out = {
+        'data': {
+            'users': user_sort[0:10],
+        }
+    }
+    return JsonResponse(out)
+
+
+
+@api_view(['GET'])
+def export_users_top(request):
+    days_before = (datetime.date.today() - timedelta(days=7)).timetuple()
+    timestamp = int(time.mktime(days_before))
+
+    txs: [WalletTransaction] = WalletTransaction.objects.filter(timestamp__gte=timestamp)
+
+    income = txs.filter(is_income=True)
+    outcome = txs.filter(is_income=False)
+
+    income_data = {}
+    for tx in income:
+        if tx.source == tx.account:
+            continue
+        if tx.source not in income_data:
+            income_data[tx.source] = []
+        income_data[tx.source].append(int(tx.value))
+
+    outcome_data = {}
+    for tx in outcome:
+        if tx.destination == tx.account:
+            continue
+        if tx.destination not in outcome_data:
+            outcome_data[tx.destination] = []
+        outcome_data[tx.destination].append(int(tx.value))
+
+    income = [{'addr': addr, 'value': sum(income_data[addr]), 'txs_count': len(income_data[addr])}
+              for addr in income_data]
+    outcome = [{'addr': addr, 'value': sum(outcome_data[addr]), 'txs_count': len(outcome_data[addr])}
+               for addr in outcome_data]
+
+    income = sorted(income, reverse=True, key=lambda x: x['value'])
+    outcome = sorted(outcome, reverse=True, key=lambda x: x['value'])
+
+    out = {
+        'data': {
+            'income': income[0:5],
+            'outcome': outcome[0:5],
+        }
+    }
+    return JsonResponse(out)
+
+
+@api_view(['GET'])
+def export_tx_top(request):
+    days_before = (datetime.date.today() - timedelta(days=1)).timetuple()
+    timestamp = int(time.mktime(days_before))
+
+    txs: [WalletTransaction] = WalletTransaction.objects.filter(timestamp__gte=timestamp)
+
+    income = txs.filter(is_income=True)
+    outcome = txs.filter(is_income=False)
+
+    income_data = {}
+    for tx in income:
+        if tx.source == tx.account:
+            continue
+        if tx.source not in income_data:
+            income_data[tx.source] = []
+        income_data[tx.source].append(int(tx.value))
+
+    outcome_data = {}
+    for tx in outcome:
+        if tx.destination == tx.account:
+            continue
+        if tx.destination not in outcome_data:
+            outcome_data[tx.destination] = []
+        outcome_data[tx.destination].append(int(tx.value))
+
+    income = [{'addr': addr, 'value': sum(income_data[addr]), 'txs_count': len(income_data[addr])}
+              for addr in income_data]
+    outcome = [{'addr': addr, 'value': sum(outcome_data[addr]), 'txs_count': len(outcome_data[addr])}
+               for addr in outcome_data]
+
+    income = sorted(income, reverse=True, key=lambda x: x['value'])
+    outcome = sorted(outcome, reverse=True, key=lambda x: x['value'])
+
+    out = {
+        'data': {
+            'income': income[0:5],
+            'outcome': outcome[0:5],
+        }
+    }
+    return JsonResponse(out)
+
+
 @api_view(['GET'])
 def export_activity(request):
     stamp = request.GET.get("after")

@@ -8,7 +8,7 @@ from channels.generic.websocket import WebsocketConsumer
 from parser.models import MarketAction, MarketData, WalletTransaction
 from wallet.types import Offer
 
-from parser.utils import obj_to_dict, obj_to_dict_gpt
+from parser.utils import obj_to_dict, obj_to_dict_gpt, get_diffs
 from .ws_types import Connection
 
 action_subscribers = []
@@ -19,31 +19,22 @@ thread_market = None
 thread_alive_checker = None
 
 
-def get_diffs(dict1, dict2):
-    keys = set(dict1.keys()).union(set(dict2.keys()))
-    differences = {}
-    for key in keys:
-        if dict1.get(key) != dict2.get(key):
-            differences[key] = [dict1.get(key), dict2.get(key)]
-    return differences
-
-
-def get_update_list(curr, prev):
+def get_update_list(curr: list[Offer], prev: list[Offer]):
     result = []
     for cb in curr:
         search = [pb for pb in prev if pb.id == cb.id]
         if search:
-            diffs = get_diffs(obj_to_dict(cb), obj_to_dict(search[0]))
+            diffs = get_diffs(cb.to_dict(), search[0].to_dict())
             if diffs:
-                result.append(obj_to_dict(cb))
+                result.append(cb.to_dict())
         else:
-            result.append(obj_to_dict(cb))
+            result.append(cb.to_dict())
 
     for pb in prev:
         search = [cb for cb in curr if cb.id == pb.id]
         if not search:
             pb.available_volume = 0
-            result.append(obj_to_dict(pb))
+            result.append(pb.to_dict())
     return result
 
 
@@ -54,7 +45,7 @@ def alive_checker():
         try:
             for conn in connections:
                 for port in conn.ports:
-                    if int(time.time()) - conn.get_last_call(port) > 30:
+                    if int(time.time()) - conn.get_last_call(port) > 60:
                         conn.ws[port].close()
 
         except Exception as e:
@@ -147,6 +138,7 @@ def update_market(delay=1):
                     user.send(json.dumps(content))
 
         except Exception as e:
+            raise
             print(f"[!] Update Market Error: {e}")
 
         finally:
@@ -304,8 +296,8 @@ class PresenceConsumer(WebsocketConsumer):
                 content = {
                     'type': 'market_subscribe',
                     'data': {
-                        'asks': [obj_to_dict(a) for a in pickle.loads(row.bid_offers)],
-                        'bids': [obj_to_dict(b) for b in pickle.loads(row.ask_offers)]
+                        'asks': [a.to_dict() for a in pickle.loads(row.bid_offers)],
+                        'bids': [b.to_dict() for b in pickle.loads(row.ask_offers)]
                     }
                 }
                 self.send(json.dumps(content))

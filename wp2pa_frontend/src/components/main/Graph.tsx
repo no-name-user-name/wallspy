@@ -13,7 +13,7 @@ import { ActivityHistory, ActivityTickRef } from '../../types/activity';
 import { CandleHistory, OkxTicker } from '../../types/okx';
 
 
-export default function Graph(props:{rates:OkxTicker, lastPrice:number, acticity24h: number, 
+export default function Graph(props:{rates:OkxTicker, lastPrice:number|undefined, acticity24h: number, 
     chart1:any, chart2:any, candleHistory:CandleHistory[], 
     candleSeries:any, activityHistory: ActivityHistory[]
     histogramSeries:any, actList:ActivityTickRef[]}){
