@@ -1,5 +1,5 @@
-/wp2pa_backend/parser/_temp/
-/wp2pa_backend/_temp/
+/wallspy_backend/parser/_temp/
+/wallspy_backend/_temp/
 /node_modules
 /.pnp
 .pnp.js
@@ -20,7 +20,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-/wp2pa_frontend/node_modules/
+/wallspy_frontend/node_modules/
 
 /.git
 /.idea
