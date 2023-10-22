@@ -1,7 +1,0 @@
-Django==4.2.6
-pyTelegramWalletApi==0.2.11
-django-filter
-django-cors-headers
-djangorestframework
-channels
-daphne
