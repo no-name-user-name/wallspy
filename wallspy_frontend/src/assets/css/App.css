@@ -1,0 +1,235 @@
+.btn {
+  cursor: pointer;
+}
+
+.fire{
+  color: #ff8f00;
+  text-shadow: 0 0 8px #ff0000c7;
+}
+
+
+
+
+
+
+
+a, a:hover, a:visited, a:active {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+select, select:hover, select:visited, select:active {
+  color: inherit;
+  text-decoration: none;
+  border: none;
+}
+
+
+
+
+
+.container{
+  /* position: fixed;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  background-color: #304C75; */
+}
+
+.btn a{
+    width: 100%;
+    transition: 0.33s all;
+    display: block;
+    padding: 5px 0
+}
+
+
+
+
+
+
+
+
+
+
+
+input {
+    outline: none !important;
+}
+
+
+
+
+
+
+
+.graph-panel .head {
+  display: flex;
+  justify-content: space-between;
+}
+
+.pair-info{
+  display: flex;
+  flex-direction: column;
+  align-content: space-around;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+
+
+.pair-info .pair{
+  font-size: 20px;
+  font-weight: 600;
+}
+.pair-info p{
+  padding: 0;
+  margin: 0;
+}
+.p-box {
+  display: flex;
+}
+
+.p-box .price {
+  margin-right: 10px;
+}
+
+.p-box p{
+  color: #ffffff99;
+}
+
+.pair-volume-token1, .pair-volume-token2{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: flex-end;
+  font-size: 14px;
+  padding: 0 15px;
+}
+.pair-volume-token1 p, .pair-volume-token2 p{
+  margin: 0;
+}
+.day-volume-token1, .day-volume-token1{
+  font-weight: 600;
+}
+.star{
+  display: flex;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    padding: 0 0 0 10px;
+}
+
+.right-box {
+  display: flex;
+  align-content: center;
+  width: fit-content;
+  justify-content: space-between;
+}
+.graph-settings {
+  margin: 30px 0;
+  display: flex;
+  justify-content: space-between;
+  color: black;
+}
+.graph-settings select{
+  padding: 5px;
+}
+
+.main-graph{
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+.graph{
+  /* padding: 20px;a */
+  width: 50%;
+}
+
+.order-book{
+  width: 50%;
+  min-width: 265px;
+}
+
+.graph.price{
+  height: 190px;
+  
+}
+.graph .activity{
+  height: 190px;
+  /* transform: translate(10px, 10px); */
+}
+
+.graph .wrapper{
+  width: 100%;
+  height: 200px;
+}
+
+.wrapper .price, .wrapper .activity{
+  height: 100%;
+}
+
+.wrapper .price div, .wrapper .activity div{
+  width: 100%;
+  height: 100%;
+}
+
+.wrapper .header{
+  text-align: left;
+  font: status-bar;
+}
+
+.user{
+  display: flex;
+  justify-content: flex-end;
+  align-items: right;
+  justify-content: right;
+  text-align: right;
+}
+
+.stats{
+  text-align: right;
+}
+ 
+.app{
+  overflow: hidden;
+}
+
+.remove-btn {
+  margin-right: 0.5rem;
+}
+
+.hidden{
+  display: none;
+}
+
+.head{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-bottom: 2px solid #304c7538;
+  padding: 0 0 10px 0;
+  width: 100%;
+}
+
+@media screen and (max-width: 600px) {
+  .container{
+    /* height: 100%; */
+    /* position: absolute; */
+    /* width: 100%; */
+    padding: 0 20px 20px;
+  }
+  body{
+        background: #04020d;
+  }
+
+  .title{
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+}
+
+

@@ -1,0 +1,148 @@
+.mini-graph {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+
+}.rates-panel {
+    /* background: #EBF0F4; */
+    /* padding: 15px 20px; */
+    height: -webkit-fill-available;
+}
+.rates-panel .head {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #304c7538;
+    padding: 0 0 10px 0;
+  }
+  .row{
+    margin: 17px 0;
+  }
+  .logo-name p {
+    padding: 0;
+    margin: 0 0;
+    font-family: monospace;
+  }
+  
+
+  .logo-name {
+    width: 80%;
+    font-size: 20px;
+  }
+  
+  .sort-box {
+    display: flex;
+    align-content: center;
+    align-items: center;
+  }
+  
+.sort-box select {
+    padding: 5px;
+    background: #211f28;
+    /* padding: 10px 10px; */
+    width: 100px;
+    height: 35px;
+  }
+
+  .head .header{
+    margin-bottom: 0
+  }
+
+  select, .search-bar {
+    box-shadow: 0 0 10px #304c7559;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+  }
+
+  
+.search-bar {background-color: #211f28; color: #ccc;display: flex;align-items: center;height: auto;}
+
+.search-bar i {
+    padding: 8px;
+}
+
+.search-bar input {
+    height: 20px;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    background: #ccc;
+}
+
+.rates{
+    display: flex;
+    padding: 0;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  
+
+.pair-rate {
+    background: #211f28;
+    border-radius: 5px;
+    box-shadow: 0 0 4px #04020d78;
+    width: 47%;
+    margin: 0 0 20px 0;
+  }
+  
+  .pair-rate p{
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    font-family: monospace;
+  }
+  .select-dot i{
+    padding: 0px;
+  }
+  
+  .body .title {
+    font-size: 10px;
+  }
+  
+.pair-wrap{
+    padding: 15px;
+  }
+
+  .pair{
+    font-weight: 600;
+  }
+  .body {
+    margin: 10px 0 0 0;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  
+.body {
+    margin: 10px 0 0 0;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .day-high, .day-percent, .day-low {
+    font-weight: 600;
+  }
+  
+  .mini-graph {
+    height: 50px;
+  }
+  
+  .left-column .day-percent, .mini-graph{
+    height: 50px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .day-high, .day-low{
+    font-size: 12px !important;
+  }
+  
+  .pair-wrap{
+    padding: 15px;
+  }
