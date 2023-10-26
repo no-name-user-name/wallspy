@@ -23,10 +23,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-bx0(5kf50z%!=b3ue8%88@5#y_)#kt3jmc=@&&-adk0n177v57'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_ALL_ORIGINS = True
+
+DEBUG = False
+# DEBUG = True
+# CORS_ALLOWED_ORIGINS = ['*']
+CORS_ALLOW_HEADERS = ['*']
 
 
 # Application definition
@@ -58,7 +63,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'wp2pa_backend.urls'
-CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {

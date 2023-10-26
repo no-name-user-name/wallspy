@@ -55,54 +55,6 @@ def alive_checker():
             time.sleep(1)
 
 
-# market subscription
-# def update_market(delay=1):
-#     prev_content = None
-#     while 1:
-#         try:
-#             row = MarketData.objects.first()
-#             content = {
-#                 'asks': [a for a in pickle.loads(row.bid_offers)],
-#                 'bids': [b for b in pickle.loads(row.ask_offers)]
-#             }
-#
-#             if prev_content is None:
-#                 prev_content = content
-#                 continue
-#
-#             prev_asks: list[Offer] = prev_content['asks']
-#             prev_bids: list[Offer] = prev_content['bids']
-#
-#             curr_asks: list[Offer] = content['asks']
-#             curr_bids: list[Offer] = content['bids']
-#
-#             bids_update_list = get_update_list(curr_bids, prev_bids)
-#             asks_update_list = get_update_list(curr_asks, prev_asks)
-#
-#             prev_content = content
-#
-#             if not bids_update_list and not asks_update_list:
-#                 continue
-#
-#             content = {
-#                 'type': 'market_subscribe',
-#                 'data': {
-#                     'asks': asks_update_list,
-#                     'bids': bids_update_list,
-#                 }
-#             }
-#
-#             for conn in connections:
-#                 for user in conn.get_market_subs():
-#                     user.send(json.dumps(content))
-#
-#         except Exception as e:
-#             print(f"[!] Update Market Error: {e}")
-#
-#         finally:
-#             time.sleep(delay)
-
-
 def update_market(delay=1):
     prev_content = None
     while True:
@@ -138,7 +90,7 @@ def update_market(delay=1):
                     user.send(json.dumps(content))
 
         except Exception as e:
-            raise
+            # raise
             print(f"[!] Update Market Error: {e}")
 
         finally:
@@ -236,6 +188,7 @@ class PresenceConsumer(WebsocketConsumer):
         super().__init__(*args, **kwargs)
 
     def connect(self):
+
         global thread_alive_checker, connections
         if thread_alive_checker is None:
             thread_alive_checker = threading.Thread(target=alive_checker)
@@ -253,13 +206,13 @@ class PresenceConsumer(WebsocketConsumer):
             current_connect: Connection = connections[connections.index(ip)]
 
             # max 4 connection on 1 ip address
-            if len(current_connect.ports) > 4:
-                self.close()
-
-            else:
-                current_connect.add_port(port, ws_obj=self)
-                self.accept()
-                pprint.pprint(connections)
+            # if len(current_connect.ports) > 4:
+            #     self.close()
+            #
+            # else:
+            current_connect.add_port(port, ws_obj=self)
+            self.accept()
+            pprint.pprint(connections)
 
     def receive(self, text_data=None, bytes_data=None):
         global thread_actions, thread_market
