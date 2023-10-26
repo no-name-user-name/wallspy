@@ -15,8 +15,8 @@ export default function Orderbook(){
     const [animateAsksRef, setAnimateAsksRef] = useState<any>()
 
     useEffect(() => {
-        const socket = new WebSocket(WS_ENDPOINT + '/ws/');
         let interval: NodeJS.Timer | null = null;
+        const socket = new WebSocket(WS_ENDPOINT + '/ws/');
         socket.onopen = function() {
             interval = setInterval(()=>{
                 const msg = {
@@ -29,7 +29,7 @@ export default function Orderbook(){
 			}
 			this.send(JSON.stringify(msg))
 		};
-
+        
         socket.onmessage = function(event) {
 			let json_data = JSON.parse(event.data)		
 			if (json_data.hasOwnProperty('type')){
@@ -38,6 +38,7 @@ export default function Orderbook(){
 				}
 			}
 		};
+    
         socket.onclose = function(event) {
             if (interval !== null){
                 clearInterval(interval)

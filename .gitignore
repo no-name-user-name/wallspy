@@ -24,3 +24,7 @@ yarn-error.log*
 
 /.git
 /.idea
+
+/wallspy_frontend/build/
+.sqlite3
+/wallspy_backend/db.sqlite3
