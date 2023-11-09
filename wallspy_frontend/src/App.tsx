@@ -6,6 +6,7 @@ import Orderbook from './views/Orderbook';
 import Activity from './views/Activity';
 import Reserves from './views/Reserves';
 import Users from './views/Users';
+import Test from './views/Test';
 
 
 function App() {
@@ -16,7 +17,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path='/'>
-          <Route index element={<Users/>} />
+          <Route index element={<Test/>} />
+          {/* <Route index element={<Users/>} /> */}
           <Route path='orderbook' element={<Orderbook />} />
           <Route path='reserves' element={<Reserves />} />
           <Route path='activity' element={<Activity />} />

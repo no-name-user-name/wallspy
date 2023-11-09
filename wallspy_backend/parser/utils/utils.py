@@ -1,3 +1,6 @@
+import asyncio
+
+
 def obj_to_dict(obj):
     classes = [int, float, str]
     new_dict = {}
@@ -54,3 +57,18 @@ def get_diffs(dict1, dict2):
         if dict1.get(key) != dict2.get(key):
             differences[key] = [dict1.get(key), dict2.get(key)]
     return differences
+
+
+def to_fixed(x, y):
+    return float("{:.2f}".format(x))
+
+
+async def gather_with_concurrency(n, *tasks):
+    semaphore = asyncio.Semaphore(n)
+
+    async def sem_task(task):
+        async with semaphore:
+            a = await task
+            return a
+
+    return await asyncio.gather(*(sem_task(task) for task in tasks))

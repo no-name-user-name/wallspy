@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-bx0(5kf50z%!=b3ue8%88@5#y_)#kt3jmc=@&&-adk0n177v57
 ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_ALL_ORIGINS = True
 
-DEBUG = False
+DEBUG = True
 # DEBUG = True
 # CORS_ALLOWED_ORIGINS = ['*']
 CORS_ALLOW_HEADERS = ['*']
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'daphne',
     'wsocket',
     'parser',
+    'bot',
     'rest_framework',
     'corsheaders',
     'django.contrib.admin',

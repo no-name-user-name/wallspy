@@ -5,10 +5,10 @@ import threading
 import time
 
 from channels.generic.websocket import WebsocketConsumer
-from parser.models import MarketAction, MarketData, WalletTransaction
+from parser.models import MarketAction, MarketData, WalletTransaction, Setting
 from wallet.types import Offer
 
-from parser.utils import obj_to_dict, obj_to_dict_gpt, get_diffs
+from parser.utils.utils import get_diffs
 from .ws_types import Connection
 
 action_subscribers = []
@@ -17,6 +17,8 @@ connections: list[Connection] = []
 thread_actions = None
 thread_market = None
 thread_alive_checker = None
+
+is_first_start = True
 
 
 def get_update_list(curr: list[Offer], prev: list[Offer]):
@@ -183,16 +185,35 @@ def update_actions(delay=1):
             time.sleep(delay)
 
 
+def update_token(delay=60):
+    prev_token = ''
+
+    while 1:
+        s: Setting = Setting.objects.all().first()
+        token = s.token
+
+        if prev_token != token:
+            prev_token = token
+
+            data = {'type': 'token_update', 'data': token}
+
+            for conn in connections:
+                for user in conn.get_market_subs():
+                    user.send(json.dumps(data))
+
+        time.sleep(delay)
+
+
 class PresenceConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def connect(self):
-
-        global thread_alive_checker, connections
-        if thread_alive_checker is None:
-            thread_alive_checker = threading.Thread(target=alive_checker)
-            thread_alive_checker.start()
+        if is_first_start:
+            threading.Thread(target=alive_checker, daemon=True).start()
+            threading.Thread(target=update_actions, daemon=True).start()
+            threading.Thread(target=update_market, daemon=True).start()
+            threading.Thread(target=update_token, daemon=True).start()
 
         ip = self.scope['client'][0]
         port = self.scope['client'][1]
@@ -205,11 +226,6 @@ class PresenceConsumer(WebsocketConsumer):
         else:
             current_connect: Connection = connections[connections.index(ip)]
 
-            # max 4 connection on 1 ip address
-            # if len(current_connect.ports) > 4:
-            #     self.close()
-            #
-            # else:
             current_connect.add_port(port, ws_obj=self)
             self.accept()
             pprint.pprint(connections)
@@ -224,10 +240,6 @@ class PresenceConsumer(WebsocketConsumer):
         port = self.scope['client'][1]
 
         if method == 'activity_subscribe':
-            if thread_actions is None:
-                thread_actions = threading.Thread(target=update_actions)
-                thread_actions.start()
-
             connections[connections.index(ip)].action_subscribe(port)
 
         elif method == 'ping':
@@ -239,11 +251,13 @@ class PresenceConsumer(WebsocketConsumer):
             connections[connections.index(ip)].update_last_call(port)
 
         elif method == 'market_subscribe':
-            if thread_market is None:
-                thread_market = threading.Thread(target=update_market)
-                thread_market.start()
 
             if self not in market_subscribers:
+
+                s: Setting = Setting.objects.all().first()
+                data = {'type': 'token_update', 'data': s.token}
+                self.send(json.dumps(data))
+
                 # fast send current market
                 row = MarketData.objects.first()
                 content = {

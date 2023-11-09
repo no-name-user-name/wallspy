@@ -1,13 +1,12 @@
 import datetime
 import pickle
 import time
-from datetime import date, timedelta
+from datetime import timedelta
 
-from django.core import serializers
 from django.http import JsonResponse
 from parser.models import MarketAction, WalletTransaction, MarketData, Balance, User, UserStat
 from parser.serializers import MarketActionSerializer
-from parser.utils import obj_to_dict
+from parser.utils.utils import obj_to_dict
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
