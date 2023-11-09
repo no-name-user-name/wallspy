@@ -1776,4 +1776,8 @@
       box-shadow: 0 0 6px 1px #add8e64d;
       background: #add8e640;
     }
+
+    .user p{
+      white-space: nowrap;
+    }
   }

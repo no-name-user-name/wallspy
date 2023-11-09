@@ -5,7 +5,7 @@ export default function TopUserRow(props:{user:TopUsers, counter: number}){
     const i = props.counter
 
     return(<>
-        <div key={u.user_id+u.last_activity} className='top-body'>
+        <div className='top-body'>
             <div className='top-user'>
                 <div className='user-name'>
                     <p>{i+1}.</p>

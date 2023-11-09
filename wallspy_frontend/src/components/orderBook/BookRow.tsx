@@ -3,6 +3,7 @@ import {
     TransitionGroup,
 } from 'react-transition-group';
 import { MarketOfferRef } from "../../types/offers";
+import { openLink } from '../../utils/Utils';
 
 function getMark(total: number, percent: number, isVerified: Boolean){
     if (isVerified){
@@ -56,7 +57,7 @@ function BookRows(props: {asksOffers: MarketOfferRef[], bidsOffers: MarketOfferR
                             timeout={1}
                             classNames="item">
                                 
-                                <div ref={row.nodeRef} className="book_row panel_decorate">
+                                <div onClick={()=>{openLink(row.id, row.user.userId)}} ref={row.nodeRef} className="book_row panel_decorate">
                                     <div className={"book_table price " + colorClass}>{row.price.value.toFixed(2)}</div>
                                     <div className="book_table volume">{row.availableVolume.toFixed(2)}</div>
                                     <div className="book_table summary">{(row.price.value * row.availableVolume).toFixed(2)}</div>

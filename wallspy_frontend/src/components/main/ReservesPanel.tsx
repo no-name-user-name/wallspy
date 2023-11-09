@@ -5,8 +5,9 @@ import { ActivityStats } from "../../types/activity"
 import { TopTx, Tx, TxPeriodData } from "../../types/txs"
 import { fetchJSON } from '../../utils/Utils';
 import { ENDPOIN } from '../../settings';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import TopAddress from '../reserves/TopAddress';
+import {IChartApi} from 'lightweight-charts';
 
 
 export default function ReservesPanel(props:{balance:number, tokenPrice: number, balanceDelta:ActivityStats, periodData: TxPeriodData}) {
@@ -26,12 +27,19 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
 
     let inTxPercent = '0'
     let outTxPercent = '0'
-    
     const [top, setTop] = useState<TopTx>()
+    const chart1 = useRef<IChartApi>(null);
+
+    function fitCharts(){
+        chart1.current?.timeScale().fitContent()
+    }
+
+
     useEffect(() => {
         fetchJSON(ENDPOIN + '/api/v1/txs/top')
         .then(result => {
             setTop(result.data)
+            fitCharts()
         })
     
       return () => {
@@ -142,7 +150,7 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
             <div className="header">Balance 30D</div>
 
             <div className='graph-box'>
-                <Chart {...options} localization={{priceFormatter: PriceFormat['TON']}}>
+                <Chart ref={chart1} {...options} localization={{priceFormatter: PriceFormat['TON']}}>
 
                     <AreaSeries
                         data={periodData.data.balance}
@@ -161,9 +169,9 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
                 </div>
             </div> 
             {
-                top?.income.map((el: Tx, i:number)=><>
+                top?.income.map((el: Tx, i:number)=>
                     <TopAddress key={'income-'+el.addr} el={el} counter={i}/>
-                </>)
+                )
             }
         </div>
         <div className={top?'top-addresses':'top-addresses hidden'}>
@@ -173,9 +181,9 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
                 </div>
             </div> 
             {
-                top?.outcome.map((el: Tx, i:number)=><>
+                top?.outcome.map((el: Tx, i:number)=>
                     <TopAddress key={'outcome-'+el.addr} el={el} counter={i}/>
-                </>)
+                )
             }
         </div>
 

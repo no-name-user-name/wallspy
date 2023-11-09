@@ -28,3 +28,7 @@ yarn-error.log*
 /wallspy_frontend/build/
 .sqlite3
 /wallspy_backend/db.sqlite3
+
+/wallspy_frontend/build/
+.sqlite3
+/wallspy_backend/db.sqlite3

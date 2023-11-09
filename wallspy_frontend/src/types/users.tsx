@@ -6,7 +6,7 @@ interface UserStats{
 }
 
 interface TopUsers{
-	'user_id': number,
+	'id': number,
     'avatar_code': string,
     'last_activity': number,
     'nickname': string,

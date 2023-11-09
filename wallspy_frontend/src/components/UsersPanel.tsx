@@ -12,18 +12,6 @@ export default function UsersPanel(props:{topList: TopUsers[]}){
                 </div>
             </div>
 
-            {/* <div className="user-stats hidden">
-                <div className="left-stats">
-                    <div>Unique</div>
-                    <div>&#62;500</div>
-                    
-                </div>
-                <div className="right-stats">
-                    <div>Active</div>
-                    <div>&#62;350</div>
-                    
-                </div>
-            </div> */}
             <div className="top-ten">
 
                 <div className='top-body'>
@@ -41,9 +29,7 @@ export default function UsersPanel(props:{topList: TopUsers[]}){
 
                 {
                     props.topList.map((u: TopUsers, i: number)=>
-                        <>
-                            <TopUserRow key={'user'+u.user_id} counter={i} user={u}/>
-                        </>
+                        <TopUserRow key={u.id} counter={i} user={u}/>
                     )
                 }
             </div>

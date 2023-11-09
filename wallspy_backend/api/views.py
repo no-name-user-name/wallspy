@@ -43,7 +43,7 @@ def export_users_stats(request):
 
         delta = last_stats.total_orders_count - start_stats.total_orders_count
         users.append({
-            'user_id': user.user_id,
+            'id': user.user_id,
             'avatar_code': user.avatar_code,
             'last_activity': user.last_activity,
             'nickname': user.nickname,

@@ -41,8 +41,9 @@ function timeToLocal(originalTime: number) {
 }
 
 function openLink(id: number, user_id: number){
+    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success')
     let url = `https://t.me/wallet?startattach=offerid_${id}_${user_id}`
-    window.open(url, '_blank');
+    window.Telegram.WebApp.openTelegramLink(url)
 }
 
 function dayPercent(open: number, current: number){

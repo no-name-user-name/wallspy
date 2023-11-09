@@ -10,7 +10,8 @@ import Users from './views/Users';
 
 function App() {
   window.Telegram.WebApp.expand()
-
+  window.Telegram.WebApp.enableClosingConfirmation()
+  
   return (
     <BrowserRouter>
       <Routes>
