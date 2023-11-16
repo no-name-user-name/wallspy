@@ -1,5 +1,5 @@
 import { ENDPOIN } from "../settings";
-import { MarketOfferRef } from "../types/offers";
+import { Offer } from "../types/offers";
 
 async function fetchJSON(url: string, method='GET', json_data={}, token='') {   
     let headers = {
@@ -54,7 +54,7 @@ function dayPercent(open: number, current: number){
     return result >= 0? '+' + result.toFixed(2) + '%' : '' + result.toFixed(2) + '%'
 }
 
-function sortByPrice(data: MarketOfferRef[], reverse: boolean = false){
+function sortByPrice(data: Offer[], reverse: boolean = false){
     let sortedData;
 
     sortedData = data.sort(function(a,b){

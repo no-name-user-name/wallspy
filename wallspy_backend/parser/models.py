@@ -8,6 +8,9 @@ class CryptoCurrency(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=5)
 
+    def __str__(self):
+        return f"{self.name}"
+
 
 class FiatCurrency(models.Model):
     id = models.AutoField(primary_key=True)
@@ -89,6 +92,9 @@ class Price(models.Model):
     type = models.CharField(max_length=100)
     value = models.FloatField()
 
+    def __str__(self):
+        return f"{self.value}{self.quote_currency_code} {self.type} {self.base_currency_code}"
+
 
 class PaymentMethod(models.Model):
     id = models.AutoField(primary_key=True)
@@ -97,29 +103,41 @@ class PaymentMethod(models.Model):
     code = models.CharField(max_length=100)
     origin_name_locale = models.CharField(max_length=100)
 
+    def __str__(self):
+        return f"{self.name} ({self.code})"
+
 
 class OrderVolumeLimit(models.Model):
     id = models.AutoField(primary_key=True)
-    min = models.CharField(max_length=100)
+    min = models.FloatField()
     currency_code = models.CharField(max_length=100)
-    max = models.CharField(max_length=100)
+    max = models.FloatField()
     approximate = models.BooleanField()
+
+    def __str__(self):
+        return f"{self.min}-{self.max}{self.currency_code}"
 
 
 class OrderAmountLimit(models.Model):
     id = models.AutoField(primary_key=True)
-    min = models.IntegerField()
-    max = models.CharField(max_length=100)
+    min = models.FloatField()
+    max = models.FloatField()
     currency_code = models.CharField(max_length=100)
     approximate = models.BooleanField()
+
+    def __str__(self):
+        return f"{self.min}-{self.max}{self.currency_code}"
 
 
 class Statistic(models.Model):
     id = models.AutoField(primary_key=True)
     user_id = models.IntegerField()
     total_orders_count = models.IntegerField()
-    success_percent = models.IntegerField()
+    success_percent = models.FloatField()
     success_rate = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.total_orders_count} ({self.success_percent})"
 
 
 class User(models.Model):
@@ -129,11 +147,13 @@ class User(models.Model):
     avatar_code = models.CharField(max_length=100)
     is_verified = models.BooleanField()
     last_activity = models.IntegerField(default=0)
-    statistics = models.ForeignKey(Statistic, on_delete=models.CASCADE, null=True)
+    statistics = models.ForeignKey(Statistic, related_name='statistics', on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return f"{self.nickname} ({self.user_id})"
 
 
 class Offer(models.Model):
-    # id = models.AutoField(primary_key=True)
     id = models.IntegerField(primary_key=True)
     number = models.CharField(max_length=100, null=True)
     available_volume = models.FloatField(null=True)
@@ -145,4 +165,8 @@ class Offer(models.Model):
                                            on_delete=models.CASCADE, null=True)
     payment_method = models.ManyToManyField(PaymentMethod, related_name="payment_method")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user", null=True)
+    is_active = models.BooleanField(default=True)
     add_time = models.DateTimeField(auto_now=True)
+
+
+

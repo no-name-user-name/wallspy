@@ -2,7 +2,7 @@ import {
     CSSTransition,
     TransitionGroup,
 } from 'react-transition-group';
-import { MarketOfferRef } from "../../types/offers";
+import { Offer } from "../../types/offers";
 import { openLink } from '../../utils/Utils';
 
 function getMark(total: number, percent: number, isVerified: Boolean){
@@ -21,11 +21,11 @@ function getMark(total: number, percent: number, isVerified: Boolean){
     return `${total} 🔸`
 }
 
-function BookRows(props: {asksOffers: MarketOfferRef[], bidsOffers: MarketOfferRef[],  type: 'asks' | 'bids', count: number}){
+function BookRows(props: {asksOffers: Offer[], bidsOffers: Offer[],  type: 'asks' | 'bids', count: number}){
     let colorClass = 'green'
     let asks = props.asksOffers.slice(0, props.count).reverse()
     let bids = props.bidsOffers.slice(0, props.count).reverse()
-    let data = [] as MarketOfferRef[]
+    let data = [] as Offer[]
     if (props.type === 'asks'){
         colorClass = 'red'
         data = asks.reverse()
@@ -35,12 +35,12 @@ function BookRows(props: {asksOffers: MarketOfferRef[], bidsOffers: MarketOfferR
     }
 
     let topVolume = 0
-    for(const o of asks as MarketOfferRef[]){
+    for(const o of asks as Offer[]){
         if (o.availableVolume > topVolume){
             topVolume = o.availableVolume
         }
     }
-    for(const o of bids as MarketOfferRef[]){
+    for(const o of bids as Offer[]){
         if (o.availableVolume > topVolume){
             topVolume = o.availableVolume
         }
@@ -50,14 +50,14 @@ function BookRows(props: {asksOffers: MarketOfferRef[], bidsOffers: MarketOfferR
         <>  
             <TransitionGroup className="action-block">
                 {
-                    data.map((row: MarketOfferRef) => (
+                    data.map((row: Offer) => (
                         <CSSTransition
                             key={row.id}
                             nodeRef={row.nodeRef}
                             timeout={1}
                             classNames="item">
                                 
-                                <div onClick={()=>{openLink(row.id, row.user.userId)}} ref={row.nodeRef} className="book_row panel_decorate">
+                                <div ref={row.nodeRef} onClick={()=>{openLink(row.id, row.user.userId)}} className="book_row panel_decorate">
                                     <div className={"book_table price " + colorClass}>{row.price.value.toFixed(2)}</div>
                                     <div className="book_table volume">{row.availableVolume.toFixed(2)}</div>
                                     <div className="book_table summary">{(row.price.value * row.availableVolume).toFixed(2)}</div>

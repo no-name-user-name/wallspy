@@ -59,7 +59,7 @@ import { LegacyRef } from "react"
 // }
 
 
-interface MarketOfferRef {
+interface Offer {
     id: number;
     number: string;
     user: User;
@@ -109,17 +109,17 @@ interface MarketOfferRef {
   }
   
 interface MarketPack{
-	asks: MarketOfferRef[],
-	bids: MarketOfferRef[],
+	asks: Offer[],
+	bids: Offer[],
 }
 
 interface BookRow{
     volume: number,
-    offers: MarketOfferRef[]
+    offers: Offer[]
 }
 
 interface BookData{
     [key: number]: BookRow
 }
 
-export type {BookData, BookRow, MarketPack, PaymentMethod, MarketOfferRef}
+export type { BookData, BookRow, MarketPack, PaymentMethod, Offer };

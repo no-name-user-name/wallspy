@@ -1,9 +1,9 @@
 
 import React from "react";
-import { MarketOfferRef } from "../../types/offers";
 import {BookRows, BookHead} from "../orderBook/BookRow";
+import { Offer } from "../../types/offers";
 
-export default function OrderBook(props:{marketAsks:MarketOfferRef[], marketBids:MarketOfferRef[], rowsCount:number, setRowsCallback:React.Dispatch<React.SetStateAction<number>>}) {
+export default function OrderBook(props:{marketAsks:Offer[], marketBids:Offer[], rowsCount:number, setRowsCallback:React.Dispatch<React.SetStateAction<number>>}) {
 
     const setRowsCount = props.setRowsCallback
     const marketAsks = props.marketAsks
