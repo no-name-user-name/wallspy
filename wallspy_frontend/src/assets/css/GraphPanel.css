@@ -74,7 +74,7 @@
         border: 1px solid rgba(100, 150, 200, 0.205);
         box-shadow: 0 0 13px 1px #211f284d;
         border-radius: 4px;
-        min-height: 250px;
+        /* min-height: 250px; */
     }
     .main-graph{
         /* margin-bottom: 40px; */

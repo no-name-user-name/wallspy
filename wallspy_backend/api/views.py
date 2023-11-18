@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from django.http import JsonResponse
 from parser.models import MarketAction, WalletTransaction, MarketData, Balance, CryptoCurrency, \
-    FiatCurrency, User, Statistic
+    FiatCurrency, User, Statistic, NewAction
 from parser.serializers import MarketActionSerializer
 from parser.utils.utils import obj_to_dict
 from rest_framework import viewsets
@@ -174,11 +174,11 @@ def export_activity(request):
     out = {'data': []}
 
     if stamp:
-        data: [MarketAction] = MarketAction.objects.filter(timestamp__gte=stamp)
+        # data: [NewAction] = NewAction.objects.filter(timestamp__gte=stamp)
         txs: [WalletTransaction] = WalletTransaction.objects.filter(timestamp__gte=stamp)
 
         rows = []
-        rows.extend(data.values_list('timestamp', flat=True))
+        # rows.extend(data.values_list('timestamp', flat=True))
         rows.extend(txs.values_list('timestamp', flat=True))
         rows.sort()
 
@@ -262,32 +262,22 @@ def export_month_transactions(request):
 
 @api_view(['GET'])
 def get_last_actions(request):
-    rows = MarketAction.objects.order_by('-id')[:10]
-
+    rows = NewAction.objects.order_by('-id')[:10]
     actions = [{
         "id": row.id,
-        "order_id": row.order_id,
+        "order": pickle.loads(row.order),
         "action_type": row.action_type,
-        "user_id": row.user_id,
-        "user_name": row.user_name,
-        "user_avatar_code": row.user_avatar_code,
-        "old_price": row.old_price,
-        "new_price": row.new_price,
-        "offer_type": row.offer_type,
-        "old_volume": row.old_volume,
-        "new_volume": row.new_volume,
         "timestamp": row.timestamp,
     } for row in rows]
-
+    actions.reverse()
     out = {'type': 'last_actions', 'actions': actions}
-
     return JsonResponse(out)
 
 
 @api_view(['GET'])
 def export_activity_stats(request):
     now = int(time.mktime(datetime.datetime.now().date().timetuple()))
-    data: [MarketAction] = list(MarketAction.objects.filter(timestamp__gte=now))
+    data: [NewAction] = list(NewAction.objects.filter(timestamp__gte=now))
     txs: [WalletTransaction] = list(WalletTransaction.objects.filter(timestamp__gte=now))
     count24h = len(data) + len(txs)
 

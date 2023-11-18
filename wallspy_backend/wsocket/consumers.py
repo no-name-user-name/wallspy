@@ -5,7 +5,7 @@ import time
 
 from channels.generic.websocket import WebsocketConsumer
 
-from parser.models import MarketData
+from parser.models import MarketData, NewAction, WalletTransaction
 from parser.utils.utils import get_diffs
 
 action_subscribers = []
@@ -65,7 +65,6 @@ def update_market(delay=3):
                 continue
 
             for pair in market_subscribers:
-
                 if not market_subscribers[pair]:
                     continue
 
@@ -113,6 +112,111 @@ def update_market(delay=3):
             time.sleep(delay)
 
 
+# def action_update(delay=1):
+#     last_time = int(time.time())
+#     while True:
+#         try:
+#             if action_subscribers:
+#
+#                 actions = NewAction.objects.filter(timestamp__gte=last_time)
+#                 last_time = int(time.time())
+#
+#                 if len(actions) > 0:
+#                     result = []
+#                     for a in actions:
+#
+#
+#                     content = {
+#                         'type': 'activity_subscribe',
+#                         'data': result
+#                     }
+#                     for conn in action_subscribers:
+#                         conn.send(json.dumps(content))
+#
+#         except Exception as e:
+#             print(f"[!] Action_update: {e}")
+#         finally:
+#             time.sleep(delay)
+
+def action_update(delay=2):
+    last_actions_id = 0
+    last_tx_id = 0
+    while 1:
+        try:
+            if not action_subscribers:
+                continue
+
+            now = int(time.time()) - 10 * 60
+            actions = NewAction.objects.filter(timestamp__gte=now)
+            txs = WalletTransaction.objects.filter(timestamp__gte=now)
+
+            if last_tx_id == 0 or last_actions_id == 0:
+                last_actions_id = actions.last().id
+                last_tx_id = txs.last().id
+                continue
+
+            if last_tx_id == txs.last().id and last_actions_id == actions.last().id:
+                continue
+
+            if txs or actions:
+
+                action_details = [{
+                    "id": row.id,
+                    "order": pickle.loads(row.order),
+                    "action_type": row.action_type,
+                    "timestamp": row.timestamp,
+                } for row in actions if row.id > last_actions_id]
+
+                txs_details = [{
+                    "id": t.id,
+                    "account": t.account,
+                    "source": t.source,
+                    "destination": t.destination,
+                    "is_income": t.is_income,
+                    "hash": t.hash,
+                    "timestamp": t.timestamp,
+                    "value": t.value
+                } for t in txs if t.id > last_tx_id]
+
+                last_tx_id = txs.last().id
+                last_actions_id = actions.last().id
+
+                times = [each.timestamp for each in txs] + [each.timestamp for each in actions]
+                times.sort()
+
+                prev_time = 0
+                counter = 0
+                period = 60 * 5
+                next_time = 0
+                result = []
+
+                for s in times:
+                    div = s % period
+                    next_time = s - div
+                    if prev_time != next_time:
+                        if prev_time != 0:
+                            result.append({'time': next_time, 'value': counter})
+                        prev_time = next_time
+                        counter = 1
+
+                    else:
+                        counter += 1
+
+                if next_time == prev_time and next_time != 0:
+                    result.append({'time': next_time + period, 'value': counter})
+
+                stamps = {'type': 'activity_subscribe', 'data': [result[-1]],
+                          'actions': action_details, 'txs': txs_details}
+
+                for conn in action_subscribers:
+                    conn.send(json.dumps(stamps))
+
+        except Exception as e:
+            print(f"[*] Error actions update: {e}")
+        finally:
+            time.sleep(delay)
+
+
 class PresenceConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -121,6 +225,7 @@ class PresenceConsumer(WebsocketConsumer):
         if is_first_start:
             threading.Thread(target=alive_checker, daemon=True).start()
             threading.Thread(target=update_market, daemon=True).start()
+            threading.Thread(target=action_update, daemon=True).start()
 
         if self not in connections:
             connections.append(self)
@@ -134,9 +239,7 @@ class PresenceConsumer(WebsocketConsumer):
     def receive(self, text_data=None, bytes_data=None):
         json_data = json.loads(text_data)
         method = json_data['method']
-
         print(json_data)
-
         if method == 'market_subscribe':
             currency = json_data['currency']
             fiat = json_data['fiat']
@@ -161,6 +264,10 @@ class PresenceConsumer(WebsocketConsumer):
             market_subscribers[f"{currency}-{fiat}"].append(self)
             print(f'market_subscribers: {market_subscribers}')
 
+        elif method == 'activity_subscribe':
+            action_subscribers.append(self)
+            print(f'activity_subscribe: {action_subscribers}')
+
         elif method == 'ping':
             content = {
                 'type': 'ping',
@@ -172,6 +279,9 @@ class PresenceConsumer(WebsocketConsumer):
     def disconnect(self, code):
         if self in connections:
             connections.remove(self)
+
+        if self in action_subscribers:
+            action_subscribers.remove(self)
 
         for each in market_subscribers:
             if self in market_subscribers[each]:

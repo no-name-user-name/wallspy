@@ -22,7 +22,7 @@ const UsersPanel: FC<UsersPanelProps> = ({topList}) => {
                 <div className='top-user-header'>
                     <div className='top-user'>
                         <div className='user-name row-name'>
-                            Top of the week
+                            7 days top MarketMaker
                         </div>
                         <div className='user-data '>
                             <div className='percent row-name'>Success rate</div>

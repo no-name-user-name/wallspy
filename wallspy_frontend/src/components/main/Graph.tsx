@@ -32,7 +32,7 @@ const Graph: FC<GraphProps> = ({rates, lastPrice, acticity24h, chart1, chart2, c
         autoSize: true,
 		rightPriceScale: {
             autoScale: true,
-			visible: true,
+			visible: false,
 			borderColor: '#f0f2f5',
             alignLabels: false,
             borderVisible: false,
@@ -62,7 +62,7 @@ const Graph: FC<GraphProps> = ({rates, lastPrice, acticity24h, chart1, chart2, c
         watermark: {
             visible: true,
             color: 'rgba(100, 100, 100, 50)',
-            text: candleHistory?'Price 24H':'LOADING',
+            text: candleHistory?'Price':'LOADING',
             fontSize: candleHistory?12:24,
             fontFamily: 'monospace',
             horzAlign: candleHistory?"top" as DeepPartial<HorzAlign>:"center" as DeepPartial<HorzAlign>,
@@ -118,45 +118,27 @@ const Graph: FC<GraphProps> = ({rates, lastPrice, acticity24h, chart1, chart2, c
 
     function getActivityInfo(data: ActivityTickRef){
         switch (data.action_type) {
-            case 'price_change':
-                if ((data.new_price!==null)&&(data.old_price!==null)){
-
-                    if (data.new_price > data.old_price){
-                        return `⬆️ Price: ${data.old_price} => ${data.new_price}`
-                    }
-                    else{
-                        return `⬇️ Price: ${data.old_price} => ${data.new_price}`
-                    }
-                }
+            case "availableVolume":
+                return `🎚 Изменил доступный объём`
                 break;
 
-            case "offer_add":
-                return `➕ Add new offer`
+            case "totalOrdersCount":
+                return `🤝 Завершил сделку`
 
-            case "offer_delete":
-                return `➖ Delete offer`
+            case "orderVolumeLimits":
+                return `🎚 Изменил торговый лимит`
 
-            case "volume_change":
-                if ((data.new_volume!==null)&&(data.old_volume!==null)){
-                    switch (data.offer_type) {
-                        case 'PURCHASE':
-                            if (data.new_volume > data.old_volume){
-                                return `⬆️ Volume ${data.old_volume.toFixed(2)} => ${data.new_volume.toFixed(2)}`
-                            }
-                            else{
-                                return `💲 Buy ${(data.old_volume-data.new_volume).toFixed(2)} TON`
-                            }
-                    
-                        case 'SALE':
-                            if (data.new_volume > data.old_volume){
-                                return `⬆️ Volume ${data.old_volume.toFixed(2)} => ${data.new_volume.toFixed(2)}`
-                            }
-                            else{
-                                return `💲 Sell ${(data.old_volume-data.new_volume).toFixed(2)} TON`
-                            }
-                    }
-                }
-                break;
+            case "nickname":
+                return `✏️ Получил никнейм`
+                
+            case "new":
+                return `🟢 Создал новый оффер`
+
+            case "delete":
+                return `🔴 Удалил оффер`
+
+            case "isVerified":
+                return `✅ Получил галочку`
         }    
         return ''
     }
@@ -265,8 +247,8 @@ const Graph: FC<GraphProps> = ({rates, lastPrice, acticity24h, chart1, chart2, c
                                         <tbody>
                                             <tr className="py-5">
                                                 <td className="" >
-                                                    <img alt={row.user_avatar_code} src={`https://walletbot.me/static/images/alias/${row.user_avatar_code}.svg`}/>
-                                                        {row.user_name}
+                                                    <img alt={row.order.user.avatarCode} src={`https://walletbot.me/static/images/alias/${row.order.user.avatarCode}.svg`}/>
+                                                    {row.order.user.nickname}
                                                 </td>
                                                 <td className="time" >{getTime(row.timestamp)}</td>
                                             </tr>

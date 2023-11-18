@@ -86,7 +86,7 @@ export default function GraphPanel(){
     }
 
     function getCandleHistory(offset=5*60){
-        fetchJSON('https://www.okx.com/api/v5/market/history-candles?instId=TON-USDT&bar=5m')
+        fetchJSON('https://www.okx.com/api/v5/market/history-candles?instId=TON-USDT&bar=30m')
         .then(data => {
             let ch = [] as CandleHistory[]
 			for (const row of data.data) {
@@ -131,7 +131,7 @@ export default function GraphPanel(){
 
 
 			let msg = {
-				"method": "activity_subscribe"
+				"method": "activity_subscribe",
 			}
 			this.send(JSON.stringify(msg))
 		};
@@ -226,10 +226,7 @@ export default function GraphPanel(){
         }
     }, [])
 
-
-
     return (<>
-
             <Header/>
             <div className="container">
                     <Graph 
