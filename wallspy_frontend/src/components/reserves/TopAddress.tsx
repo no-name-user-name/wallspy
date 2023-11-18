@@ -40,7 +40,7 @@ const TopAddressSkeleton: FC = () => {
     const array = [...Array(5)]
     return(
     <>
-        <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#fde3e3">
+        <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#615c5c">
 
         {
             array.map((e, i) => (

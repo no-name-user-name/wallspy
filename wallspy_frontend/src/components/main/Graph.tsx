@@ -173,7 +173,7 @@ const Graph: FC<GraphProps> = ({rates, lastPrice, acticity24h, chart1, chart2, c
                 <div className="graph-head">
                     <div className="pair-info">
                         <p className="pair">TON/USDT</p>
-                        <SkeletonTheme height={'13px'} baseColor="#3b3838" highlightColor="#fde3e3">
+                        <SkeletonTheme height={'13px'} baseColor="#3b3838" highlightColor="#615c5c">
                         <div className="p-box" >
                             {
                             rates&&lastPrice?
@@ -192,7 +192,7 @@ const Graph: FC<GraphProps> = ({rates, lastPrice, acticity24h, chart1, chart2, c
                         </SkeletonTheme>
                     </div>
                     
-                    <SkeletonTheme height={'16px'} baseColor="#3b3838" highlightColor="#fde3e3">
+                    <SkeletonTheme height={'16px'} baseColor="#3b3838" highlightColor="#615c5c">
                     <div className="right-box">        
                         <div className="pair-volume-token2">
                             <p className="day-volume-token2">{

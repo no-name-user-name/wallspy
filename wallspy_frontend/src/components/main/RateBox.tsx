@@ -48,7 +48,7 @@ const RateBox:FC<RateBoxProps> = ({data}) => {
 const RateBoxSkeleton:FC = () => {
     
     return(
-        <SkeletonTheme height={'13px'} baseColor="#3b3838" highlightColor="#fde3e3">
+        <SkeletonTheme height={'13px'} baseColor="#3b3838" highlightColor="#615c5c">
         <div className="pair-rate">
             <div className="pair-wrap">
                 <div className="head">

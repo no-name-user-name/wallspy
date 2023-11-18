@@ -14,7 +14,7 @@
     padding: 0 0 10px 0;
   }
   .row{
-    margin: 17px 0;
+    margin-top: 10px;
   }
   .logo-name p {
     padding: 0;
@@ -86,7 +86,6 @@
     border-radius: 5px;
     box-shadow: 0 0 4px #04020d78;
     width: 47%;
-    margin: 0 0 20px 0;
   }
   
   .pair-rate p{

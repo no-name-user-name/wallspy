@@ -28,6 +28,14 @@
     padding: 0 5px
     
 }
+.top-user-header{
+    display: flex;
+    width: 100;
+}
+.top-user-element{
+    font-size: 14px;
+    display: flex;
+}
 .top-user{
     display: flex;
     align-content: center;
@@ -38,6 +46,7 @@
     background: #211f28;
     border-radius: 4px;
     margin-bottom: 4px;
+    width: 100%;
 }
 .top-user p{
     margin: 0;
@@ -58,7 +67,8 @@
     font-size: 11px;
     font-family: monospace;
     font-weight: 600;
-    text-decoration: underline;
+    text-transform: uppercase;
+    text-shadow: 0 0 4px #916e3b;
 }
 .user-data div{
     width: 100%;

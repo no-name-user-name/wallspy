@@ -111,7 +111,7 @@ const ReservesPanel: FC<ReservesPanelProps> = ({balance, tokenPrice, balanceDelt
 
                         {
                             balance === 0 || tokenPrice=== 0?
-                                <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#fde3e3">
+                                <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#615c5c">
                                     <p>
                                         <Skeleton width={'100px'}/>
                                     </p>
@@ -137,7 +137,7 @@ const ReservesPanel: FC<ReservesPanelProps> = ({balance, tokenPrice, balanceDelt
                         
                             {
                                 !balanceDelta?
-                                    <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#fde3e3">
+                                    <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#615c5c">
                                         <p>
                                             <Skeleton width={'100px'}/>
                                         </p>
@@ -164,7 +164,7 @@ const ReservesPanel: FC<ReservesPanelProps> = ({balance, tokenPrice, balanceDelt
                         <div className="content left">
                             {
                                 !balanceDelta?
-                                    <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#fde3e3">
+                                    <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#615c5c">
                                         <p>
                                             <Skeleton width={'100px'}/>
                                         </p>
@@ -181,7 +181,7 @@ const ReservesPanel: FC<ReservesPanelProps> = ({balance, tokenPrice, balanceDelt
                         <div className="content same">
                             {
                                 !balanceDelta?
-                                    <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#fde3e3">
+                                    <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#615c5c">
                                     <p>
                                         <Skeleton width={'100px'}/>
                                     </p>

@@ -1,8 +1,13 @@
+import { FC } from "react";
 import { TopUsers } from "../types/users";
-import TopUserRow from "./users/TopUserRow";
-import TopUser from "./users/TopUserRow";
+import {TopUserRow, TopUserRowSkeleton} from "./users/TopUserRow";
 
-export default function UsersPanel(props:{topList: TopUsers[]}){
+interface UsersPanelProps{
+    topList: TopUsers[] | undefined
+}
+
+const UsersPanel: FC<UsersPanelProps> = ({topList}) => {
+    const fake_array = [...Array(15)]
 
     return (<>
         <div className="user-block">
@@ -14,8 +19,8 @@ export default function UsersPanel(props:{topList: TopUsers[]}){
 
             <div className="top-ten">
 
-                <div className='top-body'>
-                    <div className='top-user headtable'>
+                <div className='top-user-header'>
+                    <div className='top-user'>
                         <div className='user-name row-name'>
                             Top of the week
                         </div>
@@ -28,16 +33,20 @@ export default function UsersPanel(props:{topList: TopUsers[]}){
                 </div>
 
                 {
-                    props.topList.map((u: TopUsers, i: number)=>
-                        <TopUserRow key={u.id} counter={i} user={u}/>
-                    )
+                    topList?
+
+                        topList.map((u: TopUsers, i: number)=>
+                            <TopUserRow key={u.id} counter={i} user={u}/>
+                        )
+                        :
+                        fake_array.map((u, i)=>
+                            <TopUserRowSkeleton key={i}/>
+                        )
                 }
             </div>
             <div className="graph"></div>
         </div>
-
-
-
-        
     </>)
 }
+
+export default UsersPanel

@@ -20,14 +20,11 @@ export default function Users(){
 
     return(
         <>
-        {
-            topList?
-                <><Header />
-                <div className="container">
-                    <UsersPanel topList={topList}/>
-                </div></>
-            :<PageLoader/>
-        }
+            <Header />
+            <div className="container">
+                <UsersPanel topList={topList}/>
+            </div>
         </>
+
     );
 }

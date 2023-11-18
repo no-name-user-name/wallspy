@@ -60,7 +60,6 @@ def alive_checker():
 def update_market(delay=3):
     prev_content = None
     while True:
-
         try:
             if market_subscribers == {}:
                 continue
@@ -86,9 +85,6 @@ def update_market(delay=3):
                 if prev_content is None:
                     prev_content = content
                     continue
-
-                # if prev_content == content:
-                #     continue
 
                 bids_update_list = get_update_list(content['bids'], prev_content['bids'])
                 asks_update_list = get_update_list(content['asks'], prev_content['asks'])
@@ -142,7 +138,6 @@ class PresenceConsumer(WebsocketConsumer):
         print(json_data)
 
         if method == 'market_subscribe':
-            # limit = json_data['limit']
             currency = json_data['currency']
             fiat = json_data['fiat']
 
