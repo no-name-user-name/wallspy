@@ -1,13 +1,9 @@
 .mini-graph {
     height: 50px;
-    display: flex;
+    /* display: flex; */
     align-items: center;
     margin-top: 10px;
 
-}.rates-panel {
-    /* background: #EBF0F4; */
-    /* padding: 15px 20px; */
-    height: -webkit-fill-available;
 }
 .rates-panel .head {
     display: flex;
@@ -47,7 +43,9 @@
   }
 
   .head .header{
-    margin-bottom: 0
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
   }
 
   select, .search-bar {
@@ -135,7 +133,7 @@
   
   .left-column .day-percent, .mini-graph{
     height: 50px;
-    display: flex;
+    /* display: flex; */
     align-items: center;
   }
   

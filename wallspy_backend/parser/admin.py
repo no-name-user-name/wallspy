@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from parser.models import Setting, FiatCurrency, MarketData, CryptoCurrency, User, Offer
+from parser.models import Setting, FiatCurrency, MarketData, CryptoCurrency, NewAction, User
 
 
 class SettingTable(admin.ModelAdmin):
@@ -19,18 +19,17 @@ class CryptoCurrencyTable(admin.ModelAdmin):
     list_display = ('id', 'name')
 
 
-# class UserTable(admin.ModelAdmin):
-#     list_display = ('id', 'user_id', 'nickname', 'avatar_code', 'is_verified', 'last_activity', 'statistic',)
-#
-#
-class OfferTable(admin.ModelAdmin):
-    list_display = ('id', 'number', 'available_volume', 'type', 'price', 'order_amount_limit', 'order_volume_limit',
-                    'user',)
+class UserTable(admin.ModelAdmin):
+    list_display = ('id', 'user_id', 'nickname', 'avatar_code', 'is_verified', 'last_activity')
 
 
-admin.site.register(Offer, OfferTable)
+class NewActionTable(admin.ModelAdmin):
+    list_display = ('id', 'action_type',)
+
+
+admin.site.register(NewAction, NewActionTable)
 admin.site.register(CryptoCurrency, CryptoCurrencyTable)
 admin.site.register(MarketData, MarketDataTable)
 admin.site.register(Setting, SettingTable)
 admin.site.register(FiatCurrency, FiatCurrencyTable)
-# admin.site.register(User, UserTable)
+admin.site.register(User, UserTable)

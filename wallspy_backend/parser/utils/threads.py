@@ -85,8 +85,11 @@ def wallet_tx_update():
                     hash=tx_hash,
                     timestamp=timestamp
                 ).save()
+
                 i += 1
-            print(f'[*] Saved {i} new txs')
+
+            if i > 0:
+                print(f'[*] Saved {i} new txs')
 
         except Exception as e:
             print(f"[!] Tonscan loop error: {e}")

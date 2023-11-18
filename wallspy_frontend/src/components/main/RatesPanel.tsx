@@ -1,37 +1,37 @@
+import { FC } from "react";
 import { OkxTicker } from "../../types/okx";
-import RateBox from "./RateBox";
+import {RateBox, RateBoxSkeleton} from "./RateBox";
 
-export default function RatesPanel(props:{rates: OkxTicker[]}){
+interface RatesPanelProps {
+    rates: OkxTicker[] | undefined
+}
 
-
+const RatesPanel:FC<RatesPanelProps> = ({rates}) => {
+    const fake_array = [...Array(2)]
 
     return(
-        <><div className="rates-panel">
+        <>
+        <div className="rates-panel">
             <div className="head">
-
                 <div className="header title"><p>Wallet Tokens</p></div>
-
-                {/* <div className="sort-box">
-                    <select disabled={true}>
-                        <option>Sort A to Z</option>
-                    </select>
-                </div> */}
-
             </div>
-            {/* <div className="search-bar row">
-                <i className="fa-solid fa-magnifying-glass"></i>
-                <input disabled={true} placeholder="Search"></input>
-            </div> */}
 
             <div className="rates row">
-
                 {
-                props.rates.map((e)=>{
-                    return <RateBox key={e.instId} data={e}/>
-                })
-            }
-
+                    rates?
+                        rates.map((e)=>(
+                            <RateBox key={e.instId} data={e}/>
+                        ))
+                    :
+                        fake_array.map((e)=>(
+                            <RateBoxSkeleton/>
+                        ))
+                    
+                }
             </div>
-        </div></>
+        </div>
+        </>
     )
 }
+
+export default RatesPanel

@@ -209,18 +209,21 @@ input {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  border-bottom: 2px solid #304c7538;
+  height: 30px;
   padding: 0 0 10px 0;
   width: 100%;
 }
 
 @media screen and (max-width: 600px) {
-  .container{
-    /* height: 100%; */
-    /* position: absolute; */
-    /* width: 100%; */
-    padding: 0 20px 20px;
-  }
+  .container {
+    padding: 10px;
+    margin: 0 10px 10px;
+    border: 1px #7f9ebe59 solid;
+    border-radius: 5px;
+    height: max-content;
+    position: absolute;
+    width: -webkit-fill-available;
+}
   body{
         background: #04020d;
   }
@@ -230,6 +233,9 @@ input {
     font-weight: 600;
     text-transform: uppercase;
   }
+
+  
+
 }
 
 

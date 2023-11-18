@@ -7,6 +7,7 @@ import Activity from './views/Activity';
 import Reserves from './views/Reserves';
 import Users from './views/Users';
 import Test from './views/Test';
+import Home from './views/Home';
 
 
 function App() {
@@ -17,8 +18,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path='/'>
-          <Route index element={<Test/>} />
-          {/* <Route index element={<Users/>} /> */}
+          <Route index element={<Orderbook/>} />
           <Route path='orderbook' element={<Orderbook />} />
           <Route path='reserves' element={<Reserves />} />
           <Route path='activity' element={<Activity />} />

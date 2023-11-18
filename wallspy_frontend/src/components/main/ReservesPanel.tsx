@@ -1,64 +1,58 @@
-import {ColorType} from 'lightweight-charts';
-import {Chart, CandlestickSeries, HistogramSeries, AreaSeries} from 'lightweight-charts-react-wrapper';
+import {ColorType, DeepPartial, HorzAlign, VertAlign} from 'lightweight-charts';
+import {Chart, AreaSeries} from 'lightweight-charts-react-wrapper';
 
 import { ActivityStats } from "../../types/activity"
 import { TopTx, Tx, TxPeriodData } from "../../types/txs"
 import { fetchJSON } from '../../utils/Utils';
 import { ENDPOIN } from '../../settings';
-import { useEffect, useRef, useState } from 'react';
-import TopAddress from '../reserves/TopAddress';
+import { FC, useEffect, useRef, useState } from 'react';
+import {TopAddress, TopAddressSkeleton} from '../reserves/TopAddress';
 import {IChartApi} from 'lightweight-charts';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css'
 
+interface ReservesPanelProps {
+    balance:number
+    tokenPrice: number
+    balanceDelta:ActivityStats | undefined
+    periodData: TxPeriodData | undefined
+}
 
-export default function ReservesPanel(props:{balance:number, tokenPrice: number, balanceDelta:ActivityStats, periodData: TxPeriodData}) {
-    const USD = Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-    })
-    const periodData = props.periodData
-    const balance = props.balance
-    const tokenPrice = props.tokenPrice
-    const balanceDelta = props.balanceDelta
-    const balanceTON = USD.format((balance/10**9)).replaceAll(',', ' ').replace('$', '') + ' TON'
-    const balanceUSD = USD.format((tokenPrice * balance / 10 ** 9)).replaceAll(',',' ')
-    const positivBalanceDelta = '+' + USD.format(balanceDelta.balance.income / 10 ** 9).replaceAll(',', ' ').replace('$', '') + ' TON'
-    const negativeBalanceDelta = '-' + USD.format(balanceDelta.balance.outcome / 10 ** 9).replaceAll(',', ' ').replace('$', '') + ' TON'
-    const txCount = balanceDelta.txs.income_count+balanceDelta.txs.outcome_count
+const USD = Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+})
 
-    let inTxPercent = '0'
-    let outTxPercent = '0'
+const toFormat = (num: number) => {
+    return USD.format(num).replaceAll(',', ' ').replace('$', '')
+}
+
+const ReservesPanel: FC<ReservesPanelProps> = ({balance, tokenPrice, balanceDelta, periodData}) => {
     const [top, setTop] = useState<TopTx>()
     const chart1 = useRef<IChartApi>(null);
-
-    function fitCharts(){
-        chart1.current?.timeScale().fitContent()
-    }
-
 
     useEffect(() => {
         fetchJSON(ENDPOIN + '/api/v1/txs/top')
         .then(result => {
             setTop(result.data)
-            fitCharts()
         })
-    
+
       return () => {
-        
       }
     }, [])
     
 
-
-    if (txCount!==0){
-        inTxPercent = (balanceDelta.txs.income_count / (txCount) * 100).toFixed(2)
-        outTxPercent = (balanceDelta.txs.outcome_count / (balanceDelta.txs.income_count+balanceDelta.txs.outcome_count) * 100).toFixed(2)
-    }
-    
     const PriceFormat = {
-        TON: (price: number) => USD.format(price / 10 ** 9).replaceAll(',', ' ').replace('$', '') + ' TON',
+        TON: (price: number) => toFormat(price / 10 ** 9) + ' TON',
     };
+    function fitCharts(){
+        chart1.current?.timeScale().fitContent()
+    }
+    if (periodData){
+        fitCharts()
+    }
 
-    const options = {
+    let options = {
         autoSize: true,
 		rightPriceScale: {
             autoScale: true,
@@ -88,11 +82,21 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
             rightOffset: 1
 		},
         handleScroll: false,
-        handleScale: false
+        handleScale: false,
+        watermark: {
+            visible: true,
+            color: 'rgba(100, 100, 100, 50)',
+            text: periodData?'Balance 30D':'LOADING',
+            fontSize: periodData?12:24,
+            fontFamily: 'monospace',
+            horzAlign: periodData?"top" as DeepPartial<HorzAlign>:"center" as DeepPartial<HorzAlign>,
+            vertAlign: periodData?"left" as DeepPartial<VertAlign>:"center" as DeepPartial<VertAlign>
+        }
 	}
 
     return (
         <>
+                
         <div className="res-block">
             <div className='head'>
                 <div  className="header title">
@@ -104,89 +108,155 @@ export default function ReservesPanel(props:{balance:number, tokenPrice: number,
                <div className="balances">
                     <div className="content left">
                         <div className="title">Balance</div>
-                        <p>
-                            {balanceTON}
-                        </p>
-                        <p>
-                            {balanceUSD}
-                        </p>
+
+                        {
+                            balance === 0 || tokenPrice=== 0?
+                                <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#fde3e3">
+                                    <p>
+                                        <Skeleton width={'100px'}/>
+                                    </p>
+                                    <p>
+                                        <Skeleton width={'100px'}/>
+                                    </p>
+                                </SkeletonTheme>
+                            :
+                                    <>
+                                    <p>
+                                        {toFormat(balance/10**9) + ' TON'}
+                                    </p>
+                                    <p>
+                                        {'$' + toFormat(tokenPrice * balance / 10 ** 9)}
+                                    </p>
+                                    </>
+                        }
+
                     </div>
+
                     <div className="content right">
                         <div className="title">Day delta</div>
-                        <p>
-                            {positivBalanceDelta}
-                        </p>
-                        <p>
-                            {negativeBalanceDelta}
-                        </p>
+                        
+                            {
+                                !balanceDelta?
+                                    <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#fde3e3">
+                                        <p>
+                                            <Skeleton width={'100px'}/>
+                                        </p>
+                                        <p>
+                                            <Skeleton width={'100px'}/>
+                                        </p>
+                                    </SkeletonTheme>
+                                :
+                                    <>
+                                        <p>
+                                            {'+'+toFormat(balanceDelta.balance.income / 10 ** 9) + ' TON'}
+                                        </p>
+                                        <p>
+                                            {'-' + toFormat(balanceDelta.balance.outcome / 10 ** 9) + ' TON'}
+                                        </p>
+                                    </>
+
+                            }
                     </div>
                </div>
                <div className="txs">
                     <div>
                         <div className="title">Day transactions</div>
                         <div className="content left">
-                            <p>
-                                {txCount}
-                            </p>
+                            {
+                                !balanceDelta?
+                                    <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#fde3e3">
+                                        <p>
+                                            <Skeleton width={'100px'}/>
+                                        </p>
+                                    </SkeletonTheme>
+                                :
+                                    <p>
+                                        {balanceDelta.txs.income_count+balanceDelta.txs.outcome_count}
+                                    </p>
+
+                            }
                         </div>
                     </div>
                     <div>
                         <div className="content same">
-                            <p>
-                            {'In: ' + inTxPercent + '%'}
-                            </p>
-                            <p>
-                            {'Out: ' + outTxPercent + '%'}
-                            </p>
+                            {
+                                !balanceDelta?
+                                    <SkeletonTheme height={'15px'} baseColor="#3b3838" highlightColor="#fde3e3">
+                                    <p>
+                                        <Skeleton width={'100px'}/>
+                                    </p>
+                                    <p>
+                                        <Skeleton width={'100px'}/>
+                                    </p>
+                                    </SkeletonTheme>
+                                :
+                                <>
+                                    <p>
+                                        {'Income: ' + (balanceDelta.txs.income_count / (balanceDelta.txs.income_count+balanceDelta.txs.outcome_count + 1) * 100).toFixed(2) + '%'}
+                                    </p>
+                                    <p>
+                                        {'Outcome: ' + (balanceDelta.txs.outcome_count / (balanceDelta.txs.income_count+balanceDelta.txs.outcome_count + 1) * 100).toFixed(2) + '%'}
+                                    </p>
+                                </>
+                            }
                         </div>
                     </div>
                </div>
             </div>  
-
-            
         </div>
 
         <div className="reserves-graph">
-            <div className="header">Balance 30D</div>
+            {/* <div className="header">Balance 30D</div> */}
 
             <div className='graph-box'>
                 <Chart ref={chart1} {...options} localization={{priceFormatter: PriceFormat['TON']}}>
-
-                    <AreaSeries
-                        data={periodData.data.balance}
-                        lineWidth={2}
-                        crosshairMarkerVisible={false}
-                    />
-                    
+                    {
+                        periodData?
+                            <AreaSeries
+                            data={periodData.data.balance}
+                            lineWidth={2}
+                            crosshairMarkerVisible={false}
+                        />
+                        
+                        :
+                        null
+                    }
                 </Chart>
-
             </div>
         </div>
-        <div className={top?'top-addresses':'top-addresses hidden'}>
+        
+        <div className='top-addresses'>
             <div className='head'>
                 <div  className="header title">
                     <p>Top deposits per day:</p>
                 </div>
             </div> 
             {
-                top?.income.map((el: Tx, i:number)=>
-                    <TopAddress key={'income-'+el.addr} el={el} counter={i}/>
-                )
+                top?
+                    top.income.map((el: Tx, i:number)=>
+                        <TopAddress key={'income-' + el.addr} el={el}/>
+                    )
+                :
+                <TopAddressSkeleton/>
             }
         </div>
-        <div className={top?'top-addresses':'top-addresses hidden'}>
+        <div className='top-addresses'>
             <div className='head'>
                 <div  className="header title">
                     <p>Top withdrawals per day:</p>
                 </div>
             </div> 
             {
-                top?.outcome.map((el: Tx, i:number)=>
-                    <TopAddress key={'outcome-'+el.addr} el={el} counter={i}/>
+                top?
+                top.outcome.map((el: Tx, i:number)=>
+                    <TopAddress key={'outcome-' + el.addr} el={el}/>
                 )
+                :
+                <TopAddressSkeleton/>
             }
         </div>
-
         </>
     )
 }
+
+export default ReservesPanel

@@ -1,17 +1,14 @@
 import { ENDPOIN } from "../settings";
 import { Offer } from "../types/offers";
 
-async function fetchJSON(url: string, method='GET', json_data={}, token='') {   
+async function fetchJSON(url: string, method='GET', json_data=null) {   
     let headers = {
         'Content-type': 'application/json',
-    }
-    if (token!==''){
-        Object.assign(headers, {'Authorization': 'Bearer ' + token})
     }
     
     try {
         const response = await fetch(url,{
-            body: !json_data?null:JSON.stringify(json_data),
+            body: json_data===null?null:JSON.stringify(json_data),
             method: method,
             headers:headers,
         });

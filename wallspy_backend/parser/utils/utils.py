@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 
 def obj_to_dict(obj):
@@ -72,3 +73,7 @@ async def gather_with_concurrency(n, *tasks):
             return a
 
     return await asyncio.gather(*(sem_task(task) for task in tasks))
+
+
+def timestamp():
+    return int(time.time())

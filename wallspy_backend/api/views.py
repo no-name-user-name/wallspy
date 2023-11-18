@@ -4,7 +4,8 @@ import time
 from datetime import timedelta
 
 from django.http import JsonResponse
-from parser.models import MarketAction, WalletTransaction, MarketData, Balance, User, UserStat
+from parser.models import MarketAction, WalletTransaction, MarketData, Balance, CryptoCurrency, \
+    FiatCurrency, User, Statistic
 from parser.serializers import MarketActionSerializer
 from parser.utils.utils import obj_to_dict
 from rest_framework import viewsets
@@ -27,15 +28,28 @@ class MarketActionViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 @api_view(['GET'])
+def export_crypto_pairs(request):
+    crypto = list(CryptoCurrency.objects.all().values('name'))
+    fiat = list(FiatCurrency.objects.all().values('name'))
+
+    return JsonResponse({
+        'data': {
+            'crypto': [i['name'] for i in crypto],
+            'fiat': [i['name'] for i in fiat],
+        }
+    })
+
+
+@api_view(['GET'])
 def export_users_stats(request):
     days_before = (datetime.date.today() - timedelta(days=7)).timetuple()
     timestamp = int(time.mktime(days_before))
     active_users = User.objects.filter(last_activity__gte=timestamp)
     users = []
     for user in active_users:
-        stats = UserStat.objects.filter(user_id=user.user_id, timestamp__gte=timestamp)
-        start_stats: UserStat = stats.first()
-        last_stats: UserStat = stats.last()
+        stats = Statistic.objects.filter(user_id=user.user_id, timestamp__gte=timestamp)
+        start_stats: Statistic = stats.first()
+        last_stats: Statistic = stats.last()
 
         if float(last_stats.success_percent) < 90:
             continue

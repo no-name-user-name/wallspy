@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/img/logo.svg"
+import logo from "../assets/img/logo.png"
 import '../assets/css/header.css'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 export default function Header(){
     const navigate = useNavigate()
@@ -33,7 +34,7 @@ export default function Header(){
                         </div>
 
                         <div onClick={()=>{navigate('/users')}} className={path=="/users"?'btn btn-select':'btn'}>
-                            {/* <i className="fa-solid fa-fire"></i> */}
+
                             <i className="fa-solid fa-user"></i>
                         </div>
 

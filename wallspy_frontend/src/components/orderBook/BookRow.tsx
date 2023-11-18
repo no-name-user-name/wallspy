@@ -2,8 +2,20 @@ import {
     CSSTransition,
     TransitionGroup,
 } from 'react-transition-group';
-import { Offer } from "../../types/offers";
+import { Offer, MarketPack } from "../../types/offers";
 import { openLink } from '../../utils/Utils';
+import { FC } from 'react';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+
+interface BookRowsProps {
+    marketAsks: Offer[]
+    marketBids: Offer[]
+    type: 'asks' | 'bids'
+    count: number
+}
+interface BookRowsSkeletonProps {
+    count: number
+}
 
 function getMark(total: number, percent: number, isVerified: Boolean){
     if (isVerified){
@@ -21,12 +33,12 @@ function getMark(total: number, percent: number, isVerified: Boolean){
     return `${total} 🔸`
 }
 
-function BookRows(props: {asksOffers: Offer[], bidsOffers: Offer[],  type: 'asks' | 'bids', count: number}){
+const BookRows: FC<BookRowsProps> = ({marketAsks, marketBids, type, count}) => {
     let colorClass = 'green'
-    let asks = props.asksOffers.slice(0, props.count).reverse()
-    let bids = props.bidsOffers.slice(0, props.count).reverse()
+    let asks = marketAsks.slice(0, count).reverse()
+    let bids = marketBids.slice(0, count).reverse()
     let data = [] as Offer[]
-    if (props.type === 'asks'){
+    if (type === 'asks'){
         colorClass = 'red'
         data = asks.reverse()
     }
@@ -68,7 +80,7 @@ function BookRows(props: {asksOffers: Offer[], bidsOffers: Offer[],  type: 'asks
                                     <div className="book_table stats">
                                         {getMark(row.user.statistics.totalOrdersCount, row.user.statistics.successPercent, row.user.isVerified)}
                                     </div>
-                                    <div className={props.type==='asks'?'filler_red':'filler_green'} 
+                                    <div className={type==='asks'?'filler_red':'filler_green'} 
                                     style={{ width: row.availableVolume/topVolume*100<50?row.availableVolume/topVolume*100+row.availableVolume/topVolume*100*5:row.availableVolume/topVolume*100 + '%'}}></div>
                                 </div>
 
@@ -77,6 +89,23 @@ function BookRows(props: {asksOffers: Offer[], bidsOffers: Offer[],  type: 'asks
                 }
             </TransitionGroup>
         </>
+    )
+}
+
+const BookRowsSkeleton: FC<BookRowsSkeletonProps> = ({count}) => {
+    const array = [...Array(count)]
+    return (
+        <SkeletonTheme height={'29px'} baseColor="#202020" highlightColor="#444">
+            <div className="action-block">
+                {
+                    array.map((e, i) => (
+                        <div key={i} className="item">
+                            <Skeleton style={{margin:"2px 0px"}}/>
+                        </div>
+                    ))
+                }
+            </div>
+        </SkeletonTheme>
     )
 }
 
@@ -98,4 +127,4 @@ function BookHead(){
 
 
 
-export {BookRows, BookHead}
+export {BookRows, BookHead, BookRowsSkeleton}

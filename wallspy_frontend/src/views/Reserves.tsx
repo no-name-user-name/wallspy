@@ -6,12 +6,11 @@ import { ENDPOIN } from "../settings";
 import { ActivityStats } from "../types/activity";
 import { OkxTicker } from "../types/okx";
 import { fetchJSON } from "../utils/Utils";
-import PageLoader from "../components/pageLoader";
 import { TxPeriodData } from "../types/txs";
 
 export default function Reserves(){
-    const [balance, setBalance] = useState<number>()
-    const [tokenPrice, setTokenPrice] = useState<number>()
+    const [balance, setBalance] = useState<number>(0)
+    const [tokenPrice, setTokenPrice] = useState<number>(0)
     const [balanceDelta, setBalanceDelta] = useState<ActivityStats>()
     const [periodData, setPeriodData] = useState<TxPeriodData>()
 
@@ -38,13 +37,10 @@ export default function Reserves(){
     
     return(
         <>
-        {
-            balance&&tokenPrice&&balanceDelta&&periodData?
-                <><Header />
-                    <div className="container">
-                        <ReservesPanel balance={balance} tokenPrice={tokenPrice} balanceDelta={balanceDelta} periodData={periodData}/>
-                    </div></>:<PageLoader/>
-        }
+            <Header />
+            <div className="container">
+                <ReservesPanel balance={balance} tokenPrice={tokenPrice} balanceDelta={balanceDelta} periodData={periodData}/>
+            </div>
         </>
     );
 }

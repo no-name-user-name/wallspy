@@ -30,9 +30,6 @@
         width: 100%;
         padding: 0;
     }
-    .graph-panel .head{
-        margin: 0 0 15px 0;
-    }
     .pair-info .pair{
         font-size: 16px;
     }
@@ -134,5 +131,13 @@
         font-size: 16px;
         font-weight: 600;
         text-transform: uppercase;
+    }
+    .graph-head {
+        display: flex;
+        justify-content: space-between;
+        background: #211f28;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
     }
   }

@@ -4,12 +4,11 @@ import RatesPanel from "../components/main/RatesPanel";
 import { useState, useEffect } from "react";
 import { OkxTicker } from "../types/okx";
 import { fetchJSON } from "../utils/Utils";
-import PageLoader from "../components/pageLoader";
 
 
 export default function Exchanges(){
 
-    const [rates, setRates] = useState<OkxTicker[]>([])
+    const [rates, setRates] = useState<OkxTicker[]>()
  
     useEffect(() => {
         fetchJSON('https://www.okx.com/api/v5/market/tickers?instType=SPOT')
@@ -29,17 +28,9 @@ export default function Exchanges(){
 
 
     return(<>
-        {
-            rates.length > 0 ? 
-            <>
-                <Header/>
-                <div className="container">
-                    <RatesPanel rates={rates}/>
-                </div>
-            
-            </> : <><PageLoader/></>
-        }
-
-        
+        <Header/>
+        <div className="container">
+            <RatesPanel rates={rates}/>
+        </div> 
     </>);
 }

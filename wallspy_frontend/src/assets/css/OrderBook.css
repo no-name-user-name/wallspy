@@ -1569,12 +1569,13 @@
     flex-wrap: nowrap;
     flex-direction: column;
     justify-content: center;
-    margin-bottom: 35px;
+    /* margin-bottom: 35px; */
   }
   
   .book_panel{
     text-align: center;
     text-transform: uppercase;
+    padding: 1px 0;
   }
   .book_panel_2{
     display: flex;
@@ -1745,7 +1746,7 @@
     
     .numrows {
       background: #211f28;
-      width: 100px;
+      /* width: 100px; */
       text-align: center;
       text-align-last: center;
       height: 30px;
@@ -1775,6 +1776,7 @@
       height: 1px;
       box-shadow: 0 0 6px 1px #add8e64d;
       background: #add8e640;
+      margin: 4px 0;
     }
 
     .user p{
