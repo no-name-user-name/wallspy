@@ -13,8 +13,6 @@ market_subscribers: dict[str, list[WebsocketConsumer]] = {}
 connections = []
 last_ping = {}
 
-thread_actions = None
-thread_market = None
 is_first_start = True
 
 
@@ -23,14 +21,18 @@ def get_update_list(curr: list[dict], prev: list[dict]):
     for cb in curr:
         search = [pb for pb in prev if pb['id'] == cb['id']]
         if search:
+
             diffs = get_diffs(cb, search[0])
 
             if 'orderVolumeLimits' in diffs:
                 if diffs['orderVolumeLimits'][0]['max'] != diffs['orderVolumeLimits'][1]['max']:
-                    result.append(cb)
 
-            elif 'price' in diffs or 'user' in diffs:
-                result.append(cb)
+                    if cb not in result:
+                        result.append(cb)
+
+            if 'price' in diffs or 'user' in diffs:
+                if cb not in result:
+                    result.append(cb)
 
         else:
             result.append(cb)
@@ -38,7 +40,7 @@ def get_update_list(curr: list[dict], prev: list[dict]):
     for pb in prev:
         search = [cb for cb in curr if cb['id'] == pb['id']]
         if not search:
-            pb['available_volume'] = 0
+            pb['availableVolume'] = 0
             result.append(pb)
     return result
 
@@ -57,7 +59,7 @@ def alive_checker():
             time.sleep(1)
 
 
-def update_market(delay=3):
+def update_market(delay=2):
     prev_content = None
     while True:
         try:
@@ -111,32 +113,6 @@ def update_market(delay=3):
         finally:
             time.sleep(delay)
 
-
-# def action_update(delay=1):
-#     last_time = int(time.time())
-#     while True:
-#         try:
-#             if action_subscribers:
-#
-#                 actions = NewAction.objects.filter(timestamp__gte=last_time)
-#                 last_time = int(time.time())
-#
-#                 if len(actions) > 0:
-#                     result = []
-#                     for a in actions:
-#
-#
-#                     content = {
-#                         'type': 'activity_subscribe',
-#                         'data': result
-#                     }
-#                     for conn in action_subscribers:
-#                         conn.send(json.dumps(content))
-#
-#         except Exception as e:
-#             print(f"[!] Action_update: {e}")
-#         finally:
-#             time.sleep(delay)
 
 def action_update(delay=2):
     last_actions_id = 0
@@ -222,10 +198,12 @@ class PresenceConsumer(WebsocketConsumer):
         super().__init__(*args, **kwargs)
 
     def connect(self):
+        global is_first_start
         if is_first_start:
             threading.Thread(target=alive_checker, daemon=True).start()
             threading.Thread(target=update_market, daemon=True).start()
             threading.Thread(target=action_update, daemon=True).start()
+            is_first_start = False
 
         if self not in connections:
             connections.append(self)

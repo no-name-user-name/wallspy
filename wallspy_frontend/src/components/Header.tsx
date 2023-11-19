@@ -13,11 +13,10 @@ export default function Header(){
             <div className="elements">
 
                     <div className="logo">
-                        <img src={logo}/>
+                        <img src={logo}/> 
                     </div>
-
                     <div className="route-buttons">
-                        <div onClick={()=>{navigate('/orderbook')}} className={path=="/orderbook"?'btn btn-select':'btn'}>
+                        <div onClick={()=>{navigate('/orderbook')}} className={path=="/orderbook"||path=="/"?'btn btn-select':'btn'}>
                             <i className="fa-solid fa-chart-simple"></i>
                         </div> 
 

@@ -60,7 +60,7 @@ def main(cid, mid=None, custom_message=None):
     markup.add(
         InlineKeyboardButton('🎩 Запустить', web_app=WebAppInfo('https://wallspy.pages.dev/')),
         InlineKeyboardButton('💬 Чат', url='https://t.me/wallspyers'),
-        row_width=1
+        row_width=2
     )
 
     msg = '<b>Привет</b>'

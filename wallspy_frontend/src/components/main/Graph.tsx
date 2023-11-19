@@ -119,26 +119,26 @@ const Graph: FC<GraphProps> = ({rates, lastPrice, acticity24h, chart1, chart2, c
     function getActivityInfo(data: ActivityTickRef){
         switch (data.action_type) {
             case "availableVolume":
-                return `🎚 Изменил доступный объём`
+                return `🎚 Change avalible volume`
                 break;
 
             case "totalOrdersCount":
-                return `🤝 Завершил сделку`
+                return `🤝 End deal`
 
             case "orderVolumeLimits":
-                return `🎚 Изменил торговый лимит`
+                return `🎚 Change trade volime`
 
             case "nickname":
-                return `✏️ Получил никнейм`
+                return `✏️ Change nickname`
                 
             case "new":
-                return `🟢 Создал новый оффер`
+                return `➕ Create offer`
 
             case "delete":
-                return `🔴 Удалил оффер`
+                return `➖ Delete offer`
 
             case "isVerified":
-                return `✅ Получил галочку`
+                return `✅ Become Verifed`
         }    
         return ''
     }

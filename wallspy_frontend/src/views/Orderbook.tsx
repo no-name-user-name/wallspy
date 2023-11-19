@@ -21,8 +21,7 @@ const DefaultSubSetting: SubSetting = {
 export default function Test(){
     const [marketBids, setMarketBids] = useState<Offer[]>([]);
     const [marketAsks, setMarketAsks] = useState<Offer[]>([]);
-    const [animateBids, setAnimateBids] = useState<any>()
-    const [animateAsks, setAnimateAsks] = useState<any>()
+    const [market, setMarket] = useState<MarketPack>()
 
     const [currencyList, setCurrencyList] = useState<string[]>([])
     const [fiatList, setFiatList] = useState<string[]>([])
@@ -52,6 +51,7 @@ export default function Test(){
 
         let interval: NodeJS.Timer | null = null;
         const socket = new WebSocket(WS_ENDPOINT + '/ws/');
+        
         socket.onopen = function() {
 
             interval = setInterval(()=>{
@@ -74,11 +74,7 @@ export default function Test(){
 			let json_data = JSON.parse(event.data)		
 			if (json_data.hasOwnProperty('type')){
 				if (json_data.type === 'market_subscribe'){
-                    const market: MarketPack = json_data.data
-                    setAnimateBids(updateState(market.bids, marketBids, setMarketBids))    
-                    setAnimateAsks(updateState(market.asks, marketAsks, setMarketAsks))
-                    // updateState(market.bids, marketBids, setMarketBids)  
-                    // updateState(market.asks, marketAsks, setMarketAsks)
+                    setMarket(json_data.data)
 				}
 			}
 		};
@@ -87,49 +83,91 @@ export default function Test(){
             if (interval !== null){
                 clearInterval(interval)
             }
+
 		};
 
         return () => {
+            setMarket(undefined)            
             socket.close()
             console.log('Ws closed')
-            setMarketBids([])
-            setMarketAsks([])
         }
     }, [fiat, currency])    
 
-    function updateState(new_data:Offer[], old_data:Offer[], callback: React.Dispatch<React.SetStateAction<Offer[]>>){
-        let buff = [] as Offer[]
-        new_data.map((row)=>{
-            var foundObject = old_data.filter(function(item) {
-                return item.id === row.id;
-            })[0];
+    useEffect(() => {
 
-            if (foundObject){
-                if (row.availableVolume == 0){
-                    callback(current => 
-                        current.filter(obj => {
-                            return obj.id !== row.id
-                        })
-                    )
-                }
-                else if ((foundObject.availableVolume !== row.availableVolume)||(foundObject.price !== row.price)||(foundObject.user !== row.user)) {
-                    callback(current => 
-                        current.map(obj => {
-                            if (obj.id === row.id){
-                                return {...obj, available_volume: row.availableVolume, price: row.price, user: row.user}
-                            }   
-                            return obj
-                        })
-                    )
-                }
+        if (market){
+            let buff: Offer[] = []
+            if (market.bids.length !== 0){
+                market.bids.map((bid)=>{
+                    let foundObject = marketBids.filter(function(item) {
+                        return item.id === bid.id;
+                    })[0];
+                    
+                    if (foundObject){
+                        if (bid.availableVolume === 0){
+                            console.log('удаление')
+                            setMarketBids(current => current.filter((obj) => obj.id !== bid.id))
+                        }
+                        else if ((foundObject.availableVolume !== bid.availableVolume)||(foundObject.price !== bid.price)||(foundObject.user !== bid.user)) {
+                            console.log('изменение')
+                            setMarketBids(current => 
+                                current.map(obj => {
+                                    if (obj.id === bid.id){
+                                        return {...obj, available_volume: bid.availableVolume, price: bid.price, user: bid.user}
+                                    }   
+                                    return obj
+                                })
+                            )
+                        }
+                    }
+                    else{
+                        console.log('добавление')
+                        bid.nodeRef = createRef()
+                        buff.push(bid)
+                    }
+                })
             }
-            else{
-                row.nodeRef = createRef()
-                buff.push(row)
+            setMarketBids(current=> [...current, ...buff])
+            
+            let buff2: Offer[] = []
+            if (market.asks.length !== 0){
+                market.asks.map((bid)=>{
+                    let foundObject = marketAsks.filter(function(item) {
+                        return item.id === bid.id;
+                    })[0];
+                    
+                    if (foundObject){
+                        if (bid.availableVolume === 0){
+                            console.log('удаление')
+                            setMarketAsks(current => current.filter((obj) => obj.id !== bid.id))
+                        }
+                        else if ((foundObject.availableVolume !== bid.availableVolume)||(foundObject.price !== bid.price)||(foundObject.user !== bid.user)) {
+                            console.log('изменение')
+                            setMarketAsks(current => 
+                                current.map(obj => {
+                                    if (obj.id === bid.id){
+                                        return {...obj, available_volume: bid.availableVolume, price: bid.price, user: bid.user}
+                                    }   
+                                    return obj
+                                })
+                            )
+                        }
+                    }
+                    else{
+                        console.log('добавление')
+                        bid.nodeRef = createRef()
+                        buff2.push(bid)
+                        
+                    }
+                })
+                setMarketAsks(current=> [...current, ...buff2])
             }
-        })
-        callback(current=> [...current, ...buff])
-    }   
+        }
+
+      return () => {
+      }
+    }, [market])
+    
 
     return(
         <>

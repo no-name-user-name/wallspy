@@ -55,8 +55,8 @@ function sortByPrice(data: Offer[], reverse: boolean = false){
     let sortedData;
 
     sortedData = data.sort(function(a,b){
-        let x = a.price
-        let y = b.price
+        let x = a.price.value
+        let y = b.price.value
         if (!reverse){
             if(x>y){return 1;}
             if(x<y){return -1;}

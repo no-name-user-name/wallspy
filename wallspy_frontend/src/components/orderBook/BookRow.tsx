@@ -3,7 +3,7 @@ import {
     TransitionGroup,
 } from 'react-transition-group';
 import { Offer, MarketPack } from "../../types/offers";
-import { openLink } from '../../utils/Utils';
+import { openLink, sortByPrice } from '../../utils/Utils';
 import { FC } from 'react';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
@@ -35,8 +35,8 @@ function getMark(total: number, percent: number, isVerified: Boolean){
 
 const BookRows: FC<BookRowsProps> = ({marketAsks, marketBids, type, count}) => {
     let colorClass = 'green'
-    let asks = marketAsks.slice(0, count).reverse()
-    let bids = marketBids.slice(0, count).reverse()
+    let asks = sortByPrice(marketAsks).slice(0, count).reverse()
+    let bids = sortByPrice(marketBids, true).slice(0, count).reverse()
     let data = [] as Offer[]
     if (type === 'asks'){
         colorClass = 'red'

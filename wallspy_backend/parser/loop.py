@@ -29,7 +29,7 @@ async def parse(pair, token, session, timeout, proxy: Proxy):
         "quoteCurrencyCode": fiat,
         "offerType": types[0],
         "offset": 0,
-        "limit": 100,
+        "limit": 30,
         "desiredAmount": None
     }
     headers = {
@@ -241,7 +241,7 @@ async def parse_markets(pair_list, auth_token, timeout=5):
             *[parse(pair, auth_token, session=session, timeout=timeout, proxy=p.get_next()) for pair in pair_list])
 
 
-def activate(delay=5):
+def activate(delay=2):
     global users
 
     print('[*] Activate')
@@ -280,4 +280,4 @@ def activate(delay=5):
 
 
 if __name__ == '__main__':
-    activate(5)
+    activate(delay=2)

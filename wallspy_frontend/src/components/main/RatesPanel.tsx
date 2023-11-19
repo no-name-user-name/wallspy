@@ -23,10 +23,9 @@ const RatesPanel:FC<RatesPanelProps> = ({rates}) => {
                             <RateBox key={e.instId} data={e}/>
                         ))
                     :
-                        fake_array.map((e)=>(
-                            <RateBoxSkeleton/>
+                        fake_array.map((e, i)=>(
+                            <RateBoxSkeleton key={i}/>
                         ))
-                    
                 }
             </div>
         </div>
