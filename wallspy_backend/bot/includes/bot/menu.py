@@ -9,7 +9,7 @@ from bot.includes.temp import users
 bot = get_bot()
 
 
-def render(cid, msg, reply_markup=None, mid=None, photo=None, entities=None, dn=True) -> Message:
+def render(cid, msg, reply_markup=None, mid=None, photo=None, entities=None, dn=True, dw=True) -> Message:
     if cid in users.list():
         users.find(cid).last_mid = mid
 
@@ -17,7 +17,7 @@ def render(cid, msg, reply_markup=None, mid=None, photo=None, entities=None, dn=
         if photo:
             return bot.send_photo(cid, photo, caption=msg, disable_notification=dn, reply_markup=reply_markup)
         return bot.send_message(
-            cid, text=msg, disable_notification=dn, reply_markup=reply_markup, disable_web_page_preview=True)
+            cid, text=msg, disable_notification=dn, reply_markup=reply_markup, disable_web_page_preview=dw)
 
     else:
         if photo:
@@ -39,12 +39,12 @@ def render(cid, msg, reply_markup=None, mid=None, photo=None, entities=None, dn=
         else:
             try:
                 if entities:
-                    return bot.edit_message_text(msg, cid, mid, parse_mode=None, disable_web_page_preview=True,
+                    return bot.edit_message_text(msg, cid, mid, parse_mode=None, disable_web_page_preview=dw,
                                                  entities=entities, reply_markup=reply_markup)
 
                 else:
                     return bot.edit_message_text(
-                        msg, cid, mid, reply_markup=reply_markup, disable_web_page_preview=True)
+                        msg, cid, mid, reply_markup=reply_markup, disable_web_page_preview=dw)
             except:
                 try:
                     bot.delete_message(cid, mid)
@@ -57,17 +57,15 @@ def render(cid, msg, reply_markup=None, mid=None, photo=None, entities=None, dn=
 def main(cid, mid=None, custom_message=None):
     users.find(cid).step = 'MAIN_MENU'
     markup = InlineKeyboardMarkup()
-    markup.add(
-        InlineKeyboardButton('🎩 Запустить', web_app=WebAppInfo('https://wallspy.pages.dev/')),
-        InlineKeyboardButton('💬 Чат', url='https://t.me/wallspyers'),
-        row_width=2
-    )
 
-    msg = '<b>Привет</b>'
+    msg = '<b>Welcome! 🤟</b>\n\n ' \
+          'Launch the <a href="https://t.me/wallspybot/WallSpy">Wallet Spy Bot</a>!\n\n' \
+          '#BetaBuild'
+
     if custom_message:
         msg = custom_message
 
-    render(cid, msg, markup, mid)
+    render(cid, msg, markup, mid, dw=False)
 
 
 # ==== custom ==========#

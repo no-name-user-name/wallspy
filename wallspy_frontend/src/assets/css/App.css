@@ -221,7 +221,7 @@ input {
     border: 1px #7f9ebe59 solid;
     border-radius: 5px;
     height: max-content;
-    position: absolute;
+    /* position: absolute; */
     width: -webkit-fill-available;
 }
   body{

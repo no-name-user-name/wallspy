@@ -3,10 +3,14 @@ import { ENDPOIN, WS_ENDPOINT } from "../settings";
 import { ActivityHistory, ActivityTickRef, ActivityStats } from "../types/activity";
 import { CandleHistory, OkxTicker } from "../types/okx";
 import { timeToLocal, fetchJSON } from "../utils/Utils";
-import {UTCTimestamp, ISeriesApi, IChartApi} from 'lightweight-charts';
-import '../assets/css/GraphPanel.css';
+import {UTCTimestamp, ISeriesApi} from 'lightweight-charts';
+import '../assets/css/activity.css';
 import Header from "../components/Header";
-import Graph from "../components/main/Graph";
+import {CSSTransition, TransitionGroup} from 'react-transition-group';
+import PriceChart from "../components/activity/PriceChart";
+import ActivityChart from "../components/activity/ActivityChart";
+import HeadBlock from "../components/activity/HeadBlock";
+import Actions from "../components/activity/Actions";
 
 
 export default function GraphPanel(){
@@ -18,13 +22,6 @@ export default function GraphPanel(){
     const [rates, setRates] = useState<OkxTicker>()
     const [actList, setActList] = useState<ActivityTickRef[]>([])
 	const histogramSeries = useRef<ISeriesApi<'Histogram'>>(null);
-    const chart1 = useRef<IChartApi>(null);
-    const chart2 = useRef<IChartApi>(null);
-
-    function fitCharts(){
-        chart1.current?.timeScale().fitContent()
-        chart2.current?.timeScale().fitContent();
-    }
 
     function wsUpdateCandle(){
         const socket = new WebSocket('wss://ws.okx.com:8443/ws/v5/business');
@@ -66,7 +63,6 @@ export default function GraphPanel(){
                         close: close
                     })
                     setLastPrice(open)
-                    fitCharts()
                 } catch (error) {
 
                 }
@@ -101,7 +97,6 @@ export default function GraphPanel(){
 			ch.reverse()
 			setCandleHistory(ch)
             getWalletActionsHistory(ch[0].time-offset - 60 * 60 * 3)
-            fitCharts()
         })
     }
 
@@ -113,7 +108,6 @@ export default function GraphPanel(){
                 localFormat.push({time: timeToLocal(e.time) as UTCTimestamp, value: e.value})
             }
             setActivityHistory(localFormat)
-            fitCharts()
         })  
     }
 
@@ -128,7 +122,6 @@ export default function GraphPanel(){
                 }
                 this.send(JSON.stringify(msg))
             }, 15 * 1000)
-
 
 			let msg = {
 				"method": "activity_subscribe",
@@ -149,7 +142,6 @@ export default function GraphPanel(){
                             console.log(error)
                         }
                     }
-                    fitCharts()
                     getActivityStats()
                     
                     const actions = json_data.actions as ActivityTickRef[]
@@ -203,7 +195,7 @@ export default function GraphPanel(){
     }
 
     useEffect(() => {     
-        if (actList.length >= 20){
+        if (actList.length >= 10){
             setActList(curr => 
                 curr.filter(el => {
                     return el.id !== curr[curr.indexOf(actList[0])].id
@@ -226,22 +218,36 @@ export default function GraphPanel(){
         }
     }, [])
 
+
     return (<>
             <Header/>
             <div className="container">
-                    <Graph 
-                        rates={rates} 
-                        lastPrice={lastPrice} 
-                        acticity24h={acticity24h}
-                        chart1={chart1}
-                        chart2={chart2}
-                        candleHistory={candleHistory}
-                        candleSeries={candleSeries}
-                        activityHistory={activityHistory}
-                        histogramSeries={histogramSeries}
-                        actList={actList}
-                    />
+            
+                <div className="graph-panel">
+                    
+                        <div className='head'>
+                            <div  className="header title">
+                                <p>Wallet Activity</p>
+                            </div> 
+                        </div>
+
+                        <HeadBlock rates={rates} lastPrice={lastPrice} acticity24h={acticity24h}/>
+                                
+                        <div className="main-graph">
+                            <div className="graph">
+                                <div className='wrapper'>
+                                    <PriceChart candleSeries={candleSeries} candleHistory={candleHistory}/>
+                                    <ActivityChart activityHistory={activityHistory} histogramSeries={histogramSeries}/>
+                                </div>
+                            </div>
+                        </div>
+                </div>
             </div>
+
+            <div className="container">
+                <Actions actList={actList}/>
+            </div>
+
         </>
     )
 }

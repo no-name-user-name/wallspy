@@ -11,6 +11,10 @@ from bot.models import Setting, TelegramUser
 
 
 def get_bot(parse_mode="HTML") -> telebot.TeleBot:
+
+    if os.environ.get('test'):
+        os.environ['bot_token'] = os.environ['test_bot_token']
+        
     if 'bot_token' not in os.environ:
         settings: Setting = Setting.objects.all()[0]
         os.environ['bot_token'] = settings.bot_token

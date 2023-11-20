@@ -5,7 +5,6 @@ import '../assets/css/users.css';
 import { fetchJSON } from "../utils/Utils";
 import { ENDPOIN } from "../settings";
 import { TopUsers } from "../types/users";
-import PageLoader from "../components/pageLoader";
 
 export default function Users(){
     const [topList, setTopList] = useState<TopUsers[]>()

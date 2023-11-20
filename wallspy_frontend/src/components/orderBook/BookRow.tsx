@@ -21,14 +21,8 @@ function getMark(total: number, percent: number, isVerified: Boolean){
     if (isVerified){
         return `${total} ✅`
     }
-    if (percent > 93)
-        if (total > 100){
-            return `${total} 🔸`
-        }
-    if (total < 20){
-        if (percent < 90){
-            return `${total} ❌`
-        }
+    if (percent < 80){
+        return `${total} ❌`
     }
     return `${total} 🔸`
 }

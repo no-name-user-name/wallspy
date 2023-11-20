@@ -107,7 +107,17 @@ function getCookie(name: string) {
     return null;
 }
 
-export {fetchJSON, timeToLocal, openLink, dayPercent, sortByPrice, setCookie, getCookie}
+
+
+const price2Format = (num: number) => {
+    const USD = Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    })
+    return USD.format(num).replaceAll(',', ' ').replace('$', '')
+}
+
+export {fetchJSON, timeToLocal, openLink, dayPercent, sortByPrice, setCookie, getCookie, price2Format}
 
 
 

@@ -8,6 +8,9 @@ def setup_handlers(bot: TeleBot):
 
     bot.register_callback_query_handler(callbacks.handlers, func=lambda call: True)
 
-    # bot.register_inline_handler(inline.handler, lambda query: query.query == 'refund')
+    bot.register_inline_handler(inline.top_makers, lambda query: query.query == 'top')
+    bot.register_inline_handler(inline.downs, lambda query: query.query == 'scam')
+
+
 
     bot.register_message_handler(text_input.handlers, content_types=['text'], chat_types=['private'])

@@ -174,11 +174,11 @@ def export_activity(request):
     out = {'data': []}
 
     if stamp:
-        # data: [NewAction] = NewAction.objects.filter(timestamp__gte=stamp)
+        data: [NewAction] = NewAction.objects.filter(timestamp__gte=stamp)
         txs: [WalletTransaction] = WalletTransaction.objects.filter(timestamp__gte=stamp)
 
         rows = []
-        # rows.extend(data.values_list('timestamp', flat=True))
+        rows.extend(data.values_list('timestamp', flat=True))
         rows.extend(txs.values_list('timestamp', flat=True))
         rows.sort()
 

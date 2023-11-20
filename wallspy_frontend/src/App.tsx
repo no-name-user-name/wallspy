@@ -6,8 +6,6 @@ import Orderbook from './views/Orderbook';
 import Activity from './views/Activity';
 import Reserves from './views/Reserves';
 import Users from './views/Users';
-import Test from './views/Test';
-import Home from './views/Home';
 
 
 function App() {

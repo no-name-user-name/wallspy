@@ -9,7 +9,7 @@ class TelegramUser(models.Model):
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200, blank=True, null=True)
     tg_id = models.IntegerField(default=0)
-    is_premium = models.BooleanField(default=False)
+    is_premium = models.BooleanField(default=False, null=True)
     language_code = models.CharField(max_length=10, default='ru')
     photo_url = models.TextField(blank=True, null=True)
     allows_write_to_pm = models.BooleanField(default=True)
